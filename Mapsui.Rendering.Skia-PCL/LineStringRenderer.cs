@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Mapsui.Geometries;
 using Mapsui.Providers;
@@ -8,6 +9,8 @@ namespace Mapsui.Rendering.Skia
 {
     public static class LineStringRenderer
     {
+        private static readonly SKPaint PaintStroke = new SKPaint { IsAntialias = true, IsStroke = true };
+
         public static void Draw(SKCanvas canvas, IViewport viewport, IStyle style, IFeature feature, IGeometry geometry,
             float opacity)
         {
@@ -19,7 +22,6 @@ namespace Mapsui.Rendering.Skia
             }
             else
             {
-
                 var lineString = ((LineString) geometry).Vertices;
 
                 float lineWidth = 1;
@@ -43,39 +45,104 @@ namespace Mapsui.Rendering.Skia
                     dashArray = vectorStyle.Line.DashArray;
                 }
 
-                var line = WorldToScreen(viewport, lineString);
-                var path = ToSkia(line);
-                
-                using (var paint = new SKPaint())
-                {
-                    paint.IsStroke = true;
-                    paint.StrokeWidth = lineWidth;
-                    paint.Color = lineColor.ToSkia(opacity);
-                    paint.StrokeCap = strokeCap.ToSkia();
-                    paint.StrokeJoin = strokeJoin.ToSkia();
-                    paint.StrokeMiter = strokeMiterLimit;
-                    if (strokeStyle != PenStyle.Solid)
-                        paint.PathEffect = strokeStyle.ToSkia(lineWidth, dashArray);
-                    canvas.DrawPath(path, paint);
-                }
+                var path = ToSkia(viewport, lineString);
+                //var path2 = ToSkiaAlternative(viewport, lineString);
+
+                PaintStroke.StrokeWidth = lineWidth;
+                PaintStroke.Color = lineColor.ToSkia(opacity);
+                PaintStroke.StrokeCap = strokeCap.ToSkia();
+                PaintStroke.StrokeJoin = strokeJoin.ToSkia();
+                PaintStroke.StrokeMiter = strokeMiterLimit;
+                if (strokeStyle != PenStyle.Solid)
+                    PaintStroke.PathEffect = strokeStyle.ToSkia(lineWidth, dashArray);
+
+                canvas.DrawPath(path, PaintStroke);
             }
         }
 
-        private static SKPath ToSkia(List<Point> vertices)
+        private static SKPath ToSkia(IViewport viewport, IList<Point> vertices)
         {
             var points = new SKPath();
 
-            for (var i = 0; i < vertices.Count; i++)
+            if (vertices.Count == 0)
+                return points;
+
+            var screenCenterX = viewport.Width * 0.5;
+            var screenCenterY = viewport.Height * 0.5;
+            var centerX = viewport.Center.X;
+            var centerY = viewport.Center.Y;
+            var resolution = 1.0 / viewport.Resolution;
+            var rotation = viewport.Rotation / 180f * Math.PI;
+            var sin = Math.Sin(rotation);
+            var cos = Math.Cos(rotation);
+
+            var vertice = vertices[0];
+            var screenX = (vertice.X - centerX) * resolution;
+            var screenY = (centerY - vertice.Y) * resolution;
+
+            if (viewport.IsRotated)
             {
-                if (i == 0)
-                {
-                    points.MoveTo((float)vertices[i].X, (float)vertices[i].Y);
-                }
-                else
-                {
-                    points.LineTo((float)vertices[i].X, (float)vertices[i].Y);
-                }
+                var newX = screenX * cos - screenY * sin;
+                var newY = screenX * sin + screenY * cos;
+                screenX = newX;
+                screenY = newY;
             }
+
+            screenX += screenCenterX;
+            screenY += screenCenterY;
+
+            points.MoveTo((float)screenX, (float)screenY);
+
+            for (var i = 1; i < vertices.Count; i++)
+            {
+                vertice = vertices[i];
+                screenX = (vertice.X - centerX) * resolution;
+                screenY = (centerY - vertice.Y) * resolution;
+
+                if (viewport.IsRotated)
+                {
+                    var newX = screenX * cos - screenY * sin;
+                    var newY = screenX * sin + screenY * cos;
+                    screenX = newX;
+                    screenY = newY;
+                }
+
+                screenX += screenCenterX;
+                screenY += screenCenterY;
+
+                points.LineTo((float)screenX, (float)screenY);
+            }
+
+            return points;
+        }
+
+        private static SKPath ToSkiaAlternative(IViewport viewport, IList<Point> vertices)
+        {
+            var points = new SKPath();
+
+            if (vertices.Count == 0)
+                return points;
+
+            var screenCenterX = (float)(viewport.Width * 0.5);
+            var screenCenterY = (float)(viewport.Height * 0.5);
+            var centerX = (float)viewport.Center.X;
+            var centerY = (float)viewport.Center.Y;
+            var resolution = 1f / (float)viewport.Resolution;
+
+            points.MoveTo((float)vertices[0].X, -(float)vertices[0].Y);
+
+            for (var i = 1; i < vertices.Count; i++)
+            {
+                points.LineTo((float)vertices[i].X, -(float)vertices[i].Y);
+            }
+
+            var matrix = SKMatrix.MakeTranslation(-centerX, centerY);
+            SKMatrix.PostConcat(ref matrix, SKMatrix.MakeScale(resolution, resolution));
+            SKMatrix.PostConcat(ref matrix, SKMatrix.MakeRotation((float)(viewport.Rotation/180f*Math.PI)));
+            SKMatrix.PostConcat(ref matrix, SKMatrix.MakeTranslation(screenCenterX, screenCenterY));
+
+            points.Transform(matrix);
+
             return points;
         }
 

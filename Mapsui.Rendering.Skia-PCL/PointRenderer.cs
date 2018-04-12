@@ -36,10 +36,12 @@ namespace Mapsui.Rendering.Skia
             {
                 DrawPointWithVectorStyle(canvas, (VectorStyle) style, destination, opacity);
             }
-            else if (style is StyleCollection)
+            else if (style is StyleCollection styleCollection)    // case 5) StyleCollection
             {
-                foreach (var s in (StyleCollection)style)
+                foreach (var s in styleCollection)
+                {
                     Draw(canvas, viewport, s, feature, geometry, symbolCache, opacity);
+                }
             }
             else
             {

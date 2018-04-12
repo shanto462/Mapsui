@@ -23,8 +23,8 @@ namespace Mapsui.UI.Wpf
 {
     public enum RenderMode
     {
-        Wpf,
-        Skia
+        Skia,
+        Wpf
     }
 
     public partial class MapControl : Grid, IMapControl
@@ -52,12 +52,12 @@ namespace Mapsui.UI.Wpf
         public MapControl()
         {
             _scale = 1; // Scale is always 1 in WPF
-
-            Children.Add(RenderCanvas);
-            Children.Add(RenderElement);
+            
+            Children.Add(WpfCanvas);
+            Children.Add(SkiaCanvas);
             Children.Add(_selectRectangle);
 
-            RenderElement.PaintSurface += SKElementOnPaintSurface;
+            SkiaCanvas.PaintSurface += SKElementOnPaintSurface;
             RenderingWeakEventManager.AddHandler(CompositionTargetRendering);
 
             Map = new Map();
@@ -80,6 +80,8 @@ namespace Mapsui.UI.Wpf
             ManipulationInertiaStarting += OnManipulationInertiaStarting;
 
             IsManipulationEnabled = true;
+
+            RenderMode = RenderMode.Skia;
         }
 
         private static Rectangle CreateSelectRectangle()
@@ -136,9 +138,9 @@ namespace Mapsui.UI.Wpf
 
         public string ErrorMessage { get; private set; }
         
-        public Canvas RenderCanvas { get; } = CreateWpfRenderCanvas();
+        public Canvas WpfCanvas { get; } = CreateWpfRenderCanvas();
 
-        private SKElement RenderElement { get; } = CreateSkiaRenderElement();
+        private SKElement SkiaCanvas { get; } = CreateSkiaRenderElement();
 
         public RenderMode RenderMode
         {
@@ -147,15 +149,15 @@ namespace Mapsui.UI.Wpf
             {
                 if (value == RenderMode.Skia)
                 {
-                    RenderCanvas.Visibility = Visibility.Collapsed;
-                    RenderElement.Visibility = Visibility.Visible;
+                    WpfCanvas.Visibility = Visibility.Collapsed;
+                    SkiaCanvas.Visibility = Visibility.Visible;
                     Renderer = new Rendering.Skia.MapRenderer();
                     Refresh();
                 }
                 else
                 {
-                    RenderElement.Visibility = Visibility.Collapsed;
-                    RenderCanvas.Visibility = Visibility.Visible;
+                    SkiaCanvas.Visibility = Visibility.Collapsed;
+                    WpfCanvas.Visibility = Visibility.Visible;
                     Renderer = new MapRenderer();
                     Refresh();
                 }
@@ -234,7 +236,7 @@ namespace Mapsui.UI.Wpf
 
         public void RefreshData()
         {
-            _map.ViewChanged(true);
+            _map?.ViewChanged(true);
         }
 
         public void Clear()
@@ -584,7 +586,7 @@ namespace Mapsui.UI.Wpf
             if (!_invalid) return; // Don't render when nothing has changed
 
             if (RenderMode == RenderMode.Wpf) RenderWpf();
-            else RenderElement.InvalidateVisual();
+            else SkiaCanvas.InvalidateVisual();
         }
 
         private void RenderWpf()
@@ -595,7 +597,7 @@ namespace Mapsui.UI.Wpf
 
             TryInitializeViewport();
 
-            Renderer.Render(RenderCanvas, Map.Viewport, _map.Layers, Map.Widgets, _map.BackColor);
+            Renderer.Render(WpfCanvas, Map.Viewport, _map.Layers, Map.Widgets, _map.BackColor);
 
             _invalid = false;
         }
@@ -735,20 +737,10 @@ namespace Mapsui.UI.Wpf
         }
         private float GetSkiaScale()
         {
-            var presentationSource = PresentationSource.FromVisual(this);
-            if (presentationSource == null) throw new Exception("PresentationSource is null");
-            var compositionTarget = presentationSource.CompositionTarget;
-            if (compositionTarget == null) throw new Exception("CompositionTarget is null");
-
-            var m = compositionTarget.TransformToDevice;
-
-            var dpiX = m.M11;
-            var dpiY = m.M22;
-
-            if (dpiX != dpiY)
-                throw new ArgumentException();
-
-            return (float)dpiX;
+            // Apparenly it should be something like this but there is an issue with
+            // initialization. Since it always returns 1 I replaced it with just return 1
+            // https://gist.github.com/pauldendulk/bceb790607660471b2b674e92721504a
+            return 1;
         }
 
         private void SKElementOnPaintSurface(object sender, SKPaintSurfaceEventArgs e)

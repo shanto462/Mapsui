@@ -2,13 +2,13 @@ using System;
 using System.IO;
 using Mapsui.Styles;
 using SkiaSharp;
-using SkiaSharp.Extended.Svg;
 
 namespace Mapsui.Rendering.Skia
 {
     public static class BitmapHelper
     {
         private static readonly SKPaint Paint = new SKPaint(); // Reuse for performance. Only for opacity
+        private static readonly SKPaint QualityPaint = new SKPaint() { FilterQuality = SKFilterQuality.Low }; // Only for high/med/low quality resizing of tiles
 
         public static BitmapInfo LoadBitmap(object bitmapStream)
         {
@@ -94,7 +94,7 @@ namespace Mapsui.Rendering.Skia
             //var color = new SKColor(255, 255, 255, (byte)(255 * opacity));
             //var paint = new SKPaint { Color = color, FilterQuality = SKFilterQuality.High };
 
-            canvas.DrawPicture(svg.Picture, null);
+            canvas.DrawPicture(svg.Picture);
 
             canvas.Restore();
         }
@@ -147,7 +147,7 @@ namespace Mapsui.Rendering.Skia
             }
             else
             {
-                canvas.DrawImage(bitmap, rect);
+                canvas.DrawImage(bitmap, rect, QualityPaint);
             }
 
         }

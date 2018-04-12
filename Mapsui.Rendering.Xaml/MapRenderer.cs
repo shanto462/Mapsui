@@ -153,7 +153,7 @@ namespace Mapsui.Rendering.Xaml
 
                     foreach (var feature in features)
                     {
-                        if (layerStyle is IThemeStyle) style = (layerStyle as IThemeStyle).GetStyle(feature);
+                        if (layerStyle is IThemeStyle) style = (layerStyle as IThemeStyle).GetStyle(feature, viewport.Resolution);
                         if (style == null || 
                             style.Enabled == false || 
                             style.MinVisible > viewport.Resolution ||

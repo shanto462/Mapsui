@@ -46,7 +46,11 @@ namespace Mapsui.Rendering.Skia
                 }
 
                 var path = ToSkia(viewport, lineString);
+                //var path1 = ToSkia(viewport, lineString);
                 //var path2 = ToSkiaAlternative(viewport, lineString);
+                //var path3 = ToSkia(viewport, lineString);
+                //var path4 = ToSkiaAlternative(viewport, lineString);
+                //var path5 = ToSkia(viewport, lineString);
 
                 PaintStroke.StrokeWidth = lineWidth;
                 PaintStroke.Color = lineColor.ToSkia(opacity);
@@ -62,19 +66,20 @@ namespace Mapsui.Rendering.Skia
 
         private static SKPath ToSkia(IViewport viewport, IList<Point> vertices)
         {
-            var points = new SKPath();
-
             if (vertices.Count == 0)
-                return points;
+                return new SKPath();
+
+            var points = new SKPoint[vertices.Count];
+            var pointPos = 0;
 
             var screenCenterX = viewport.Width * 0.5;
             var screenCenterY = viewport.Height * 0.5;
             var centerX = viewport.Center.X;
             var centerY = viewport.Center.Y;
             var resolution = 1.0 / viewport.Resolution;
-            var rotation = viewport.Rotation / 180f * Math.PI;
-            var sin = Math.Sin(rotation);
-            var cos = Math.Cos(rotation);
+
+            double sin = 0;
+            double cos = 1;
 
             var vertice = vertices[0];
             var screenX = (vertice.X - centerX) * resolution;
@@ -82,6 +87,9 @@ namespace Mapsui.Rendering.Skia
 
             if (viewport.IsRotated)
             {
+                var rotation = viewport.Rotation / 180f * Math.PI;
+                sin = Math.Sin(rotation);
+                cos = Math.Cos(rotation);
                 var newX = screenX * cos - screenY * sin;
                 var newY = screenX * sin + screenY * cos;
                 screenX = newX;
@@ -91,7 +99,7 @@ namespace Mapsui.Rendering.Skia
             screenX += screenCenterX;
             screenY += screenCenterY;
 
-            points.MoveTo((float)screenX, (float)screenY);
+            points[pointPos++] = new SKPoint((float)screenX, (float)screenY);
 
             for (var i = 1; i < vertices.Count; i++)
             {
@@ -110,18 +118,23 @@ namespace Mapsui.Rendering.Skia
                 screenX += screenCenterX;
                 screenY += screenCenterY;
 
-                points.LineTo((float)screenX, (float)screenY);
+                points[pointPos++] = new SKPoint((float)screenX, (float)screenY);
             }
 
-            return points;
+            var path = new SKPath();
+
+            path.AddPoly(points, false);
+
+            return path;
         }
 
         private static SKPath ToSkiaAlternative(IViewport viewport, IList<Point> vertices)
         {
-            var points = new SKPath();
-
             if (vertices.Count == 0)
-                return points;
+                return new SKPath();
+
+            var points = new SKPoint[vertices.Count];
+            var pointPos = 0;
 
             var screenCenterX = (float)(viewport.Width * 0.5);
             var screenCenterY = (float)(viewport.Height * 0.5);
@@ -129,11 +142,11 @@ namespace Mapsui.Rendering.Skia
             var centerY = (float)viewport.Center.Y;
             var resolution = 1f / (float)viewport.Resolution;
 
-            points.MoveTo((float)vertices[0].X, -(float)vertices[0].Y);
+            points[pointPos++] = new SKPoint((float)vertices[0].X, -(float)vertices[0].Y);
 
             for (var i = 1; i < vertices.Count; i++)
             {
-                points.LineTo((float)vertices[i].X, -(float)vertices[i].Y);
+                points[pointPos++] = new SKPoint((float)vertices[i].X, -(float)vertices[i].Y);
             }
 
             var matrix = SKMatrix.MakeTranslation(-centerX, centerY);
@@ -141,9 +154,12 @@ namespace Mapsui.Rendering.Skia
             SKMatrix.PostConcat(ref matrix, SKMatrix.MakeRotation((float)(viewport.Rotation/180f*Math.PI)));
             SKMatrix.PostConcat(ref matrix, SKMatrix.MakeTranslation(screenCenterX, screenCenterY));
 
-            points.Transform(matrix);
+            var path = new SKPath();
 
-            return points;
+            path.AddPoly(points, false);
+            path.Transform(matrix);
+
+            return path;
         }
 
         private static List<Point> WorldToScreen(IViewport viewport, IEnumerable<Point> points)

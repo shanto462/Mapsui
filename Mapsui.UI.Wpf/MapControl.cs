@@ -353,7 +353,8 @@ namespace Mapsui.UI.Wpf
             Map.Viewport.Center.X += 0.000000001;
             Map.Viewport.Center.Y += 0.000000001;
 
-            StartZoomAnimation(Map.Viewport.Resolution, _toResolution);
+            Map.NavigateTo(_toResolution);
+            //StartZoomAnimation(Map.Viewport.Resolution, _toResolution);
         }
 
         private void StartZoomAnimation(double begin, double end)

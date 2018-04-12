@@ -36,6 +36,11 @@ namespace Mapsui.Rendering.Skia
             {
                 DrawPointWithVectorStyle(canvas, (VectorStyle) style, destination, opacity);
             }
+            else if (style is StyleCollection)
+            {
+                foreach (var s in (StyleCollection)style)
+                    Draw(canvas, viewport, s, feature, geometry, symbolCache, opacity);
+            }
             else
             {
                 throw new Exception($"Style of type '{style.GetType()}' is not supported for points");

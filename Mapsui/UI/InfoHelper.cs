@@ -80,7 +80,7 @@ namespace Mapsui.UI
             {
                 foreach (var style in styles)
                 {
-                    var localStyle = HandleThemeStyle(feature, style);
+                    var localStyle = HandleThemeStyle(feature, style, resolution);
 
                     if (localStyle is SymbolStyle symbolStyle)
                     {
@@ -127,7 +127,7 @@ namespace Mapsui.UI
             {
                 foreach (var style in styles)
                 {
-                    var localStyle = HandleThemeStyle(feature, style);
+                    var localStyle = HandleThemeStyle(feature, style, resolution);
 
                     if (localStyle is VectorStyle symbolStyle)
                     {
@@ -149,9 +149,9 @@ namespace Mapsui.UI
             return false;
         }
 
-        private static IStyle HandleThemeStyle(IFeature feature, IStyle style)
+        private static IStyle HandleThemeStyle(IFeature feature, IStyle style, double resolution)
         {
-            if (style is IThemeStyle themeStyle) return themeStyle.GetStyle(feature);
+            if (style is IThemeStyle themeStyle) return themeStyle.GetStyle(feature, resolution);
             return style;
         }
 

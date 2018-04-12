@@ -35,7 +35,7 @@ namespace Mapsui.Rendering
 
                 foreach (var feature in features)
                 {
-                    if (layerStyle is IThemeStyle) style = (layerStyle as IThemeStyle).GetStyle(feature);
+                    if (layerStyle is IThemeStyle) style = (layerStyle as IThemeStyle).GetStyle(feature, viewport.Resolution);
                     if (style == null || style.Enabled == false || style.MinVisible > viewport.Resolution || style.MaxVisible < viewport.Resolution) continue;
 
                     callback(viewport, style, feature, (float)layer.Opacity);

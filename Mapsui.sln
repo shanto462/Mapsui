@@ -84,8 +84,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mapsui.Samples.Uwp", "Sampl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mapsui.VectorTiles", "S:\Entwicklung\Mapsui.VectorTiles\Mapsui.VectorTiles\Mapsui.VectorTiles.csproj", "{E80B8182-1EDA-413C-8A0B-2B4A22E8D2FB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mapsui.VectorTiles.Mapbox", "S:\Entwicklung\Mapsui.VectorTiles\Mapsui.VectorTiles.Mapbox\Mapsui.VectorTiles.Mapbox.csproj", "{E1EA7DC2-6EA3-403A-A2DB-7143C9E5B704}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mapsui.VectorTiles.MapboxGLStyler", "S:\Entwicklung\Mapsui.VectorTiles\Mapsui.VectorTiles.MapboxGLStyler\Mapsui.VectorTiles.MapboxGLStyler.csproj", "{65AA694B-0CCB-46B8-8D6D-671F4BCB86AF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mapsui.VectorTiles.Sample.Wpf", "S:\Entwicklung\Mapsui.VectorTiles\Samples\Mapsui.VectorTiles.Sample.Wpf\Mapsui.VectorTiles.Sample.Wpf.csproj", "{9E7FB4C9-3EC0-407B-8D98-02F27963A478}"
@@ -489,22 +487,6 @@ Global
 		{E80B8182-1EDA-413C-8A0B-2B4A22E8D2FB}.Release|x64.Build.0 = Release|Any CPU
 		{E80B8182-1EDA-413C-8A0B-2B4A22E8D2FB}.Release|x86.ActiveCfg = Release|Any CPU
 		{E80B8182-1EDA-413C-8A0B-2B4A22E8D2FB}.Release|x86.Build.0 = Release|Any CPU
-		{E1EA7DC2-6EA3-403A-A2DB-7143C9E5B704}.Debug|AnyCPU.ActiveCfg = Debug|Any CPU
-		{E1EA7DC2-6EA3-403A-A2DB-7143C9E5B704}.Debug|AnyCPU.Build.0 = Debug|Any CPU
-		{E1EA7DC2-6EA3-403A-A2DB-7143C9E5B704}.Debug|ARM.ActiveCfg = Debug|Any CPU
-		{E1EA7DC2-6EA3-403A-A2DB-7143C9E5B704}.Debug|ARM.Build.0 = Debug|Any CPU
-		{E1EA7DC2-6EA3-403A-A2DB-7143C9E5B704}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{E1EA7DC2-6EA3-403A-A2DB-7143C9E5B704}.Debug|x64.Build.0 = Debug|Any CPU
-		{E1EA7DC2-6EA3-403A-A2DB-7143C9E5B704}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{E1EA7DC2-6EA3-403A-A2DB-7143C9E5B704}.Debug|x86.Build.0 = Debug|Any CPU
-		{E1EA7DC2-6EA3-403A-A2DB-7143C9E5B704}.Release|AnyCPU.ActiveCfg = Release|Any CPU
-		{E1EA7DC2-6EA3-403A-A2DB-7143C9E5B704}.Release|AnyCPU.Build.0 = Release|Any CPU
-		{E1EA7DC2-6EA3-403A-A2DB-7143C9E5B704}.Release|ARM.ActiveCfg = Release|Any CPU
-		{E1EA7DC2-6EA3-403A-A2DB-7143C9E5B704}.Release|ARM.Build.0 = Release|Any CPU
-		{E1EA7DC2-6EA3-403A-A2DB-7143C9E5B704}.Release|x64.ActiveCfg = Release|Any CPU
-		{E1EA7DC2-6EA3-403A-A2DB-7143C9E5B704}.Release|x64.Build.0 = Release|Any CPU
-		{E1EA7DC2-6EA3-403A-A2DB-7143C9E5B704}.Release|x86.ActiveCfg = Release|Any CPU
-		{E1EA7DC2-6EA3-403A-A2DB-7143C9E5B704}.Release|x86.Build.0 = Release|Any CPU
 		{65AA694B-0CCB-46B8-8D6D-671F4BCB86AF}.Debug|AnyCPU.ActiveCfg = Debug|Any CPU
 		{65AA694B-0CCB-46B8-8D6D-671F4BCB86AF}.Debug|AnyCPU.Build.0 = Debug|Any CPU
 		{65AA694B-0CCB-46B8-8D6D-671F4BCB86AF}.Debug|ARM.ActiveCfg = Debug|Any CPU

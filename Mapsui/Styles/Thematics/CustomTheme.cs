@@ -52,7 +52,7 @@ namespace Mapsui.Styles.Thematics
 			StyleDelegate = getStyleMethod;
 		}
 
-		public IStyle GetStyle(IFeature row)
+		public IStyle GetStyle(IFeature row, double resolution)
 		{
             return StyleDelegate(row) ?? DefaultStyle;
 		}

@@ -32,6 +32,12 @@ namespace Mapsui.Rendering.Skia
 		        bitmapInfo.IterationUsed = currentIteration;
 		        tileCache[raster] = bitmapInfo;
 
+                // Is there a RasterStyle for this raster bitmap?
+                if (style is RasterStyle rasterStyle)
+                {
+                    opacity = rasterStyle.Opacity;
+                }
+
 		        var boundingBox = feature.Geometry.GetBoundingBox();
 
 		        if (viewport.IsRotated)

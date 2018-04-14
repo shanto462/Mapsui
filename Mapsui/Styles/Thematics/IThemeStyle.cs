@@ -24,11 +24,11 @@ namespace Mapsui.Styles.Thematics
 	/// </summary>
 	public interface IThemeStyle : IStyle
 	{
-		/// <summary>
-		/// Returns the style based on a feature
-		/// </summary>
-		/// <param name="feature">Feature to calculate color from</param>
-		/// <returns>Color</returns>
-		IStyle GetStyle(IFeature feature, double zoomLevel);
+        /// <summary>
+        /// Returns the style based on a feature and a resolution
+        /// </summary>
+        /// <param name="feature">Feature to calculate style for</param>
+        /// <returns>Style to use for this feature and this resolution</returns>
+        IStyle GetStyle(IFeature feature, double resolution);
 	}
 }

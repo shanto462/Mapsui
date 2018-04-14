@@ -29,6 +29,19 @@ namespace Mapsui.Styles
             A = alpha;
         }
 
+        public Color(string text)
+        {
+            var color = Color.FromString(text);
+
+            if (color != null)
+            {
+                R = color.R;
+                G = color.G;
+                B = color.B;
+                A = color.A;
+            }
+        }
+
         public int R { get; set; }
         public int G { get; set; }
         public int B { get; set; }

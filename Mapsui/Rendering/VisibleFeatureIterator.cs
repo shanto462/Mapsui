@@ -26,6 +26,8 @@ namespace Mapsui.Rendering
         private static void IterateLayer(IViewport viewport, ILayer layer,
             Action<IViewport, IStyle, IFeature, float> callback)
         {
+            var i = 0;
+
             var features = layer.GetFeaturesInView(viewport.Extent, viewport.Resolution).ToList();
 
             var layerStyles = ToArray(layer);
@@ -42,11 +44,13 @@ namespace Mapsui.Rendering
                     {
                         foreach (var s in styles)
                         {
+                            i++;
                             callback(viewport, s, feature, (float)layer.Opacity);
                         }
                     }
                     else
                     {
+                        i++;
                         callback(viewport, style, feature, (float)layer.Opacity);
                     }
                 }
@@ -59,10 +63,13 @@ namespace Mapsui.Rendering
                 {
                     if (feature.Styles != null && featureStyle.Enabled)
                     {
+                        i++;
                         callback(viewport, featureStyle, feature, (float)layer.Opacity);
                     }
                 }
             }
+
+            System.Diagnostics.Debug.WriteLine($"Darwn {i} features");
         }
 
         private static IStyle[] ToArray(IStyle style)

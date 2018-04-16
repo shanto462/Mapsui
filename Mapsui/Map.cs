@@ -270,7 +270,7 @@ namespace Mapsui
         private static IReadOnlyList<double> DetermineResolutions(IEnumerable<ILayer> layers)
         {
             var items = new Dictionary<double, double>();
-            const float normalizedDistanceThreshold = 0.75f;
+            const float normalizedDistanceThreshold = 0.05f; // 0.75f;
             foreach (var layer in layers)
             {
                 if (!layer.Enabled || layer.Resolutions == null) continue;

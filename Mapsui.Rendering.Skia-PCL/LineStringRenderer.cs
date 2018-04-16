@@ -59,6 +59,8 @@ namespace Mapsui.Rendering.Skia
                 //var path4 = ToSkiaAlternative(viewport, lineString);
                 //var path5 = ToSkia(viewport, lineString);
 
+                //PaintStroke = new SKPaint { IsAntialias = true, IsStroke = true };
+
                 PaintStroke.StrokeWidth = lineWidth;
                 PaintStroke.Color = lineColor.ToSkia(opacity);
                 PaintStroke.StrokeCap = strokeCap.ToSkia();
@@ -66,6 +68,8 @@ namespace Mapsui.Rendering.Skia
                 PaintStroke.StrokeMiter = strokeMiterLimit;
                 if (strokeStyle != PenStyle.Solid)
                     PaintStroke.PathEffect = strokeStyle.ToSkia(lineWidth, dashArray);
+                else
+                    PaintStroke.PathEffect = null;
 
                 canvas.DrawPath(path, PaintStroke);
             }

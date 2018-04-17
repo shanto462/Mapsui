@@ -45,7 +45,20 @@ namespace Mapsui.Rendering.Skia
         {
             var text = style.GetLabelText(feature);
             if (string.IsNullOrEmpty(text)) return;
-            DrawLabel(canvas, x, y, style, text, layerOpacity);
+            if (feature.Geometry is Geometries.Point)
+                DrawLabel(canvas, x, y, style, text, layerOpacity);
+            else
+                DrawLabelOnPath(canvas, feature.Geometry, style, text, layerOpacity);
+        }
+
+        private static void DrawLabelOnPath(SKCanvas target, Geometries.IGeometry geometry, LabelStyle style, string text, float layerOpacity)
+        {
+            UpdatePaint(style, layerOpacity);
+
+            var path
+
+            target.DrawTextOnPath(text, path, 0, 0, Paint);
+
         }
 
         private static SKImage CreateLabelAsBitmap(LabelStyle style, string text, float layerOpacity)
@@ -85,17 +98,9 @@ namespace Mapsui.Rendering.Skia
 
             Line[] lines = null;
 
-            float emHeight = 0;
-            float maxWidth = 0;
+            float emsSize = (float)style.Font.Size;
+            float maxWidth = (float)style.MaxWidth * emsSize;
             bool hasNewline = text.Contains("\n"); // There could be a multi line text by newline
-
-            // Get default values for unit em
-            if (style.MaxWidth > 0 || hasNewline)
-            {
-                Paint.MeasureText("M", ref rect);
-                emHeight = Paint.FontSpacing;
-                maxWidth = (float)style.MaxWidth * rect.Width;
-            }
 
             Paint.MeasureText(text, ref rect);
 
@@ -112,11 +117,11 @@ namespace Mapsui.Rendering.Skia
                     var width = 0f;
                     for (var i = 0; i < lines.Length; i++)
                     {
-                        lines[i].Baseline = baseline + (float)(style.LineHeight * emHeight * i);
+                        lines[i].Baseline = baseline + (float)(style.LineHeight * emsSize * i);
                         width = Math.Max(lines[i].Width, width);
                     }
 
-                    drawRect = new SKRect(0, 0, width, (float)(drawRect.Height + style.LineHeight * emHeight * (lines.Length - 1)));
+                    drawRect = new SKRect(0, 0, width, (float)(drawRect.Height + style.LineHeight * emsSize * (lines.Length - 1)));
                 }
 
                 // Text is to long, so wrap it by words
@@ -126,11 +131,11 @@ namespace Mapsui.Rendering.Skia
                     var width = 0f;
                     for (var i = 0; i < lines.Length; i++)
                     {
-                        lines[i].Baseline = baseline + (float)(style.LineHeight * emHeight * i);
+                        lines[i].Baseline = baseline + (float)(style.LineHeight * emsSize * i);
                         width = Math.Max(lines[i].Width, width);
                     }
 
-                    drawRect = new SKRect(0, 0, width, (float)(drawRect.Height + style.LineHeight * emHeight * (lines.Length - 1)));
+                    drawRect = new SKRect(0, 0, width, (float)(drawRect.Height + style.LineHeight * emsSize * (lines.Length - 1)));
                 }
 
                 // Shorten it at begining

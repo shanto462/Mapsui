@@ -68,6 +68,7 @@
     <Compile Include="Maps\BingSample.cs" />
     <Compile Include="Maps\CenterOnLocationSample.cs" />
     <Compile Include="Maps\KeepWithinExtentsSample.cs" />
+    <Compile Include="Maps\LabelsOnPathSample.cs" />
     <Compile Include="Maps\LabelsSample.cs" />
     <Compile Include="Maps\MbTilesOverlaySample.cs" />
     <Compile Include="Maps\MbTilesSample.cs" />

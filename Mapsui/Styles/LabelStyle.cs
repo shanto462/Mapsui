@@ -98,6 +98,7 @@ namespace Mapsui.Styles
             CollisionDetection = false;
             ForeColor = Color.Black;
             BackColor = new Brush { Color = Color.White };
+            Justify = HorizontalAlignmentEnum.Center;
             HorizontalAlignment = HorizontalAlignmentEnum.Center;
             VerticalAlignment = VerticalAlignmentEnum.Center;
             MaxWidth = 0;
@@ -112,8 +113,9 @@ namespace Mapsui.Styles
             CollisionDetection = false;
             ForeColor = new Color(labelStyle.ForeColor);
             BackColor = new Brush(labelStyle.BackColor);
-            HorizontalAlignment = HorizontalAlignmentEnum.Center;
-            VerticalAlignment = VerticalAlignmentEnum.Center;
+            Justify = labelStyle.Justify;
+            HorizontalAlignment = labelStyle.HorizontalAlignment;
+            VerticalAlignment = labelStyle.VerticalAlignment;
             MaxWidth = labelStyle.MaxWidth;
             WordWrap = labelStyle.WordWrap;
             LineHeight = labelStyle.LineHeight;
@@ -154,12 +156,17 @@ namespace Mapsui.Styles
         public bool CollisionDetection { get; set; }
 
         /// <summary>
-        /// The horisontal alignment of the text in relation to the labelpoint
+        /// The horizontal justify of the text, if there are more than one line
+        /// </summary>
+        public HorizontalAlignmentEnum Justify { get; set; }
+
+        /// <summary>
+        /// The horizontal alignment of the text in relation to the labelpoint
         /// </summary>
         public HorizontalAlignmentEnum HorizontalAlignment { get; set; }
 
         /// <summary>
-        /// The horisontal alignment of the text in relation to the labelpoint
+        /// The vertical alignment of the text in relation to the labelpoint
         /// </summary>
         public VerticalAlignmentEnum VerticalAlignment { get; set; }
 

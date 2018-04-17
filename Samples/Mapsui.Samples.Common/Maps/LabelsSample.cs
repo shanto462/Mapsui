@@ -89,7 +89,8 @@ namespace Mapsui.Samples.Common.Maps
             {
                 Text = "Polygon",
                 BackColor = new Brush(Color.Gray),
-                HorizontalAlignment = LabelStyle.HorizontalAlignmentEnum.Center
+                HorizontalAlignment = LabelStyle.HorizontalAlignmentEnum.Center,
+                Spacing = 20,
             });
             return polygon;
         }

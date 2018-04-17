@@ -38,6 +38,7 @@ namespace Mapsui.Samples.Common
                 ["OpacityStyle"] = OpacityStyleSample.CreateMap,
                 ["Svg"] = SvgSample.CreateMap,
                 ["Atlas"] = AtlasSample.CreateMap,
+                ["Label on Path"] = LabelOnPathSample.CreateMap,
             };
         }
     }

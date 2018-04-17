@@ -16,7 +16,11 @@ namespace Mapsui.Rendering.Skia
                 var center = viewport.WorldToScreen(worldCenter);
                 LabelRenderer.Draw(canvas, viewport, labelStyle, feature, (float) center.X, (float) center.Y, opacity);
             }
-            else if (style is LineString)
+            else if (style is SymbolStyle)
+            {
+
+            }
+            else if (style is VectorStyle)
             {
                 var lineString = ((LineString) geometry).Vertices;
 

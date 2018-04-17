@@ -16,7 +16,7 @@ namespace Mapsui.Rendering.Skia
                 var center = viewport.WorldToScreen(worldCenter);
                 LabelRenderer.Draw(canvas, viewport, (LabelStyle)style, feature, (float)center.X, (float)center.Y, opacity);
             }
-            else
+            else if (style is VectorStyle)
             {
                 var polygon = (Polygon)geometry;
 

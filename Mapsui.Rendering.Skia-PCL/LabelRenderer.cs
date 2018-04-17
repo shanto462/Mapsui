@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Mapsui.Geometries;
 using Mapsui.Providers;
 using Mapsui.Styles;
 using SkiaSharp;
@@ -40,23 +41,52 @@ namespace Mapsui.Rendering.Skia
                 horizontalAlignment: style.HorizontalAlignment, verticalAlignment: style.VerticalAlignment);
         }
 
-        public static void Draw(SKCanvas canvas, IStyle style, IFeature feature, float x, float y,
+        public static void Draw(SKCanvas canvas, IViewport viewport, LabelStyle style, IFeature feature, float x, float y,
             float layerOpacity)
         {
-            if (style is StyleCollection styleCollection)
-            {
-                foreach (var s in styleCollection)
-                {
-                    Draw(canvas, s, feature, x, y, layerOpacity);
-                }
-            }
-            else if (!(style is LabelStyle))
-            {
-                return;
-            }
-            var text = ((LabelStyle)style).GetLabelText(feature);
+            var text = style.GetLabelText(feature);
             if (string.IsNullOrEmpty(text)) return;
-            DrawLabel(canvas, x, y, (LabelStyle)style, text, layerOpacity);
+            if (feature.Geometry is Geometries.Point)
+                DrawLabel(canvas, x, y, style, text, layerOpacity);
+            else
+                DrawLabelOnPath(canvas, viewport, feature.Geometry, style, text, layerOpacity);
+        }
+
+        private static void DrawLabelOnPath(SKCanvas target, IViewport viewport, Geometries.IGeometry geometry, LabelStyle style, string text, float layerOpacity)
+        {
+            UpdatePaint(style, layerOpacity);
+
+            var path = geometry is LineString ? ((LineString)geometry).Vertices.ToSkiaPath(viewport, target.LocalClipBounds) : ((Polygon)geometry).ToSkiaPath(viewport, target.LocalClipBounds, 1f);
+            var rect = new SKRect();
+
+            Paint.MeasureText(text, ref rect);
+
+            var lines = BreakText(style, text, rect, out var drawRect);
+
+            var horizontalAlign = CalcHorizontalAlignment(style.HorizontalAlignment);
+            var verticalAlign = CalcVerticalAlignment(style.VerticalAlignment);
+
+            var offsetX = style.Offset.IsRelative ? drawRect.Width * style.Offset.X : style.Offset.X;
+            var offsetY = style.Offset.IsRelative ? drawRect.Height * style.Offset.Y : style.Offset.Y;
+
+            drawRect.Offset(
+                -drawRect.Width * horizontalAlign + (float)offsetX,
+                -drawRect.Height * verticalAlign + (float)offsetY);
+
+            // If style has a halo value, than draw halo text
+            if (style.Halo != null)
+            {
+                UpdatePaint(style, layerOpacity);
+                Paint.Style = SKPaintStyle.StrokeAndFill;
+                Paint.Color = style.Halo.Color.ToSkia(layerOpacity);
+                Paint.StrokeWidth = (float)style.Halo.Width * 2;
+
+                DrawTextOnPath(target, lines, style, drawRect, path);
+            }
+
+            UpdatePaint(style, layerOpacity);
+
+            DrawTextOnPath(target, lines, style, drawRect, path);
         }
 
         private static SKImage CreateLabelAsBitmap(LabelStyle style, string text, float layerOpacity)
@@ -94,95 +124,9 @@ namespace Mapsui.Rendering.Skia
 
             var rect = new SKRect();
 
-            Line[] lines = null;
-
-            float emHeight = 0;
-            float maxWidth = 0;
-            bool hasNewline = text.Contains("\n"); // There could be a multi line text by newline
-
-            // Get default values for unit em
-            if (style.MaxWidth > 0 || hasNewline)
-            {
-                Paint.MeasureText("M", ref rect);
-                emHeight = Paint.FontSpacing;
-                maxWidth = (float)style.MaxWidth * rect.Width;
-            }
-
             Paint.MeasureText(text, ref rect);
 
-            var baseline = -rect.Top;  // Distance from top to baseline of text
-
-            var drawRect = new SKRect(0, 0, rect.Right - rect.Left, rect.Bottom - rect.Top);
-
-            if ((style.MaxWidth > 0 && drawRect.Width > maxWidth) || hasNewline)
-            {
-                // Text has a line feed or should be shorten by character wrap
-                if (hasNewline || style.WordWrap == LabelStyle.LineBreakMode.CharacterWrap)
-                {
-                    lines = SplitLines(text, Paint, hasNewline ? drawRect.Width : maxWidth, string.Empty);
-                    var width = 0f;
-                    for (var i = 0; i < lines.Length; i++)
-                    {
-                        lines[i].Baseline = baseline + (float)(style.LineHeight * emHeight * i);
-                        width = Math.Max(lines[i].Width, width);
-                    }
-
-                    drawRect = new SKRect(0, 0, width, (float)(drawRect.Height + style.LineHeight * emHeight * (lines.Length - 1)));
-                }
-
-                // Text is to long, so wrap it by words
-                if (style.WordWrap == LabelStyle.LineBreakMode.WordWrap)
-                {
-                    lines = SplitLines(text, Paint, maxWidth, " ");
-                    var width = 0f;
-                    for (var i = 0; i < lines.Length; i++)
-                    {
-                        lines[i].Baseline = baseline + (float)(style.LineHeight * emHeight * i);
-                        width = Math.Max(lines[i].Width, width);
-                    }
-
-                    drawRect = new SKRect(0, 0, width, (float)(drawRect.Height + style.LineHeight * emHeight * (lines.Length - 1)));
-                }
-
-                // Shorten it at begining
-                if (style.WordWrap == LabelStyle.LineBreakMode.HeadTruncation)
-                {
-                    var result = text.Substring(text.Length - (int) style.MaxWidth - 2);
-                    while (result.Length > 1 && Paint.MeasureText("..." + result) > maxWidth)
-                        result = result.Substring(1);
-                    text = "..." + result;
-                    Paint.MeasureText(text, ref rect);
-                    drawRect = new SKRect(0, 0, rect.Right - rect.Left, rect.Bottom - rect.Top);
-                }
-
-                // Shorten it at end
-                if (style.WordWrap == LabelStyle.LineBreakMode.TailTruncation)
-                {
-                    var result = text.Substring(0, (int)style.MaxWidth + 2);
-                    while (result.Length > 1 && Paint.MeasureText(result + "...") > maxWidth)
-                        result = result.Substring(0, result.Length - 1);
-                    text = result + "...";
-                    Paint.MeasureText(text, ref rect);
-                    drawRect = new SKRect(0, 0, rect.Right - rect.Left, rect.Bottom - rect.Top);
-                }
-
-                // Shorten it in the middle
-                if (style.WordWrap == LabelStyle.LineBreakMode.MiddleTruncation)
-                {
-                    var result1 = text.Substring(0, (int)(style.MaxWidth/2) + 1);
-                    var result2 = text.Substring(text.Length - (int)(style.MaxWidth/2) - 1);
-                    while (result1.Length > 1 && result2.Length > 1 &&
-                           Paint.MeasureText(result1 + "..." + result2) > maxWidth)
-                    {
-                        result1 = result1.Substring(0, result1.Length - 1);
-                        result2 = result2.Substring(1);
-                    }
-
-                    text = result1 + "..." + result2;
-                    Paint.MeasureText(text, ref rect);
-                    drawRect = new SKRect(0, 0, rect.Right - rect.Left, rect.Bottom - rect.Top);
-                }
-            }
+            var lines = BreakText(style, text, rect, out var drawRect);
 
             var horizontalAlign = CalcHorizontalAlignment(style.HorizontalAlignment);
             var verticalAlign = CalcVerticalAlignment(style.VerticalAlignment);
@@ -206,44 +150,169 @@ namespace Mapsui.Rendering.Skia
             if (style.Halo != null)
             {
                 UpdatePaint(style, layerOpacity);
+
                 Paint.Style = SKPaintStyle.StrokeAndFill;
                 Paint.Color = style.Halo.Color.ToSkia(layerOpacity);
                 Paint.StrokeWidth = (float)style.Halo.Width * 2;
 
-                if (lines != null)
-                {
-                    var left = drawRect.Left;
-                    foreach (var line in lines)
-                    {
-                        if (style.HorizontalAlignment == LabelStyle.HorizontalAlignmentEnum.Center)
-                            target.DrawText(line.Value, (float)(left + (drawRect.Width - line.Width) * 0.5), drawRect.Top + line.Baseline, Paint);
-                        else if (style.HorizontalAlignment == LabelStyle.HorizontalAlignmentEnum.Right)
-                            target.DrawText(line.Value, left + drawRect.Width - line.Width, drawRect.Top + line.Baseline, Paint);
-                        else
-                            target.DrawText(line.Value, left, drawRect.Top + line.Baseline, Paint);
-                    }
-                }
-                else
-                    target.DrawText(text, drawRect.Left, drawRect.Top + baseline, Paint);
+                DrawText(target, lines, style, drawRect);
+
+                UpdatePaint(style, layerOpacity);
             }
 
-            UpdatePaint(style, layerOpacity);
+            DrawText(target, lines, style, drawRect);
+        }
 
+        private static Line[] BreakText(LabelStyle style, string text, SKRect rect, out SKRect drawRect)
+        {
+            drawRect = new SKRect(0, 0, rect.Right - rect.Left, rect.Bottom - rect.Top);
+
+            // Set defaults for first line
+            var lines = new Line[] { new Line
+            {
+                Value = text,
+                Baseline = -rect.Top,  // Distance from top to baseline of text
+                Width = rect.Right - rect.Left,
+            } };
+
+            float emsSize = (float)style.Font.Size;
+            float maxWidth = (float)style.MaxWidth * emsSize;
+            bool hasNewline = text.Contains("\n"); // There could be a multi line text by newline
+
+            if ((style.MaxWidth > 0 && drawRect.Width > maxWidth) || hasNewline)
+            {
+                // Text has a line feed or should be shorten by character wrap
+                if (hasNewline || style.WordWrap == LabelStyle.LineBreakMode.CharacterWrap)
+                {
+                    lines = SplitLines(text, Paint, hasNewline ? drawRect.Width : maxWidth, string.Empty);
+                    var width = 0f;
+                    for (var i = 0; i < lines.Length; i++)
+                    {
+                        lines[i].Baseline = -rect.Top + (float)(style.LineHeight * emsSize * i);
+                        width = Math.Max(lines[i].Width, width);
+                    }
+
+                    drawRect = new SKRect(0, 0, width, (float)(drawRect.Height + style.LineHeight * emsSize * (lines.Length - 1)));
+                }
+
+                // Text is to long, so wrap it by words
+                if (style.WordWrap == LabelStyle.LineBreakMode.WordWrap)
+                {
+                    lines = SplitLines(text, Paint, maxWidth, " ");
+                    var width = 0f;
+                    for (var i = 0; i < lines.Length; i++)
+                    {
+                        lines[i].Baseline = -rect.Top + (float)(style.LineHeight * emsSize * i);
+                        width = Math.Max(lines[i].Width, width);
+                    }
+
+                    drawRect = new SKRect(0, 0, width, (float)(drawRect.Height + style.LineHeight * emsSize * (lines.Length - 1)));
+                }
+
+                // Shorten it at begining
+                if (style.WordWrap == LabelStyle.LineBreakMode.HeadTruncation)
+                {
+                    var result = text.Substring(text.Length - (int)style.MaxWidth - 2);
+                    while (result.Length > 1 && Paint.MeasureText("..." + result) > maxWidth)
+                        result = result.Substring(1);
+                    text = "..." + result;
+                    Paint.MeasureText(text, ref rect);
+                    drawRect = new SKRect(0, 0, rect.Right - rect.Left, rect.Bottom - rect.Top);
+                }
+
+                // Shorten it at end
+                if (style.WordWrap == LabelStyle.LineBreakMode.TailTruncation)
+                {
+                    var result = text.Substring(0, (int)style.MaxWidth + 2);
+                    while (result.Length > 1 && Paint.MeasureText(result + "...") > maxWidth)
+                        result = result.Substring(0, result.Length - 1);
+                    text = result + "...";
+                    Paint.MeasureText(text, ref rect);
+                    drawRect = new SKRect(0, 0, rect.Right - rect.Left, rect.Bottom - rect.Top);
+                }
+
+                // Shorten it in the middle
+                if (style.WordWrap == LabelStyle.LineBreakMode.MiddleTruncation)
+                {
+                    var result1 = text.Substring(0, (int)(style.MaxWidth / 2) + 1);
+                    var result2 = text.Substring(text.Length - (int)(style.MaxWidth / 2) - 1);
+                    while (result1.Length > 1 && result2.Length > 1 &&
+                           Paint.MeasureText(result1 + "..." + result2) > maxWidth)
+                    {
+                        result1 = result1.Substring(0, result1.Length - 1);
+                        result2 = result2.Substring(1);
+                    }
+
+                    text = result1 + "..." + result2;
+                    Paint.MeasureText(text, ref rect);
+                    drawRect = new SKRect(0, 0, rect.Right - rect.Left, rect.Bottom - rect.Top);
+                }
+            }
+
+            return lines;
+        }
+
+        private static void DrawTextOnPath(SKCanvas target, Line[] lines, LabelStyle style, SKRect drawRect, SKPath path)
+        {
+            var measurePath = new SKPathMeasure(path).Length;
+            var measureText = drawRect.Width;
+
+            var offsetX = (float)(style.Offset.IsRelative ? drawRect.Width * style.Offset.X : style.Offset.X);
+            var offsetY = (float)(style.Offset.IsRelative ? drawRect.Height * style.Offset.Y : style.Offset.Y);
+
+            float start = offsetX;
+
+            switch (style.Justify)
+            {
+                case LabelStyle.HorizontalAlignmentEnum.Center:
+                    start += measurePath % ((float)drawRect.Width + (float)style.Spacing) * 0.5f;
+                    break;
+                case LabelStyle.HorizontalAlignmentEnum.Right:
+                    start += measurePath % ((float)drawRect.Width + (float)style.Spacing);
+                    break;
+                case LabelStyle.HorizontalAlignmentEnum.Left:
+                default:
+                    start = offsetX;
+                    break;
+            }
+
+            while (start + measureText < measurePath)
+            {
+                foreach (var line in lines)
+                {
+                    if (style.Justify == LabelStyle.HorizontalAlignmentEnum.Center)
+                        target.DrawTextOnPath(line.Value, path, start + (drawRect.Width - line.Width) * 0.5f, offsetY + drawRect.Top + line.Baseline, Paint);
+                    else if (style.Justify == LabelStyle.HorizontalAlignmentEnum.Right)
+                        target.DrawTextOnPath(line.Value, path, start + drawRect.Width - line.Width, offsetY + drawRect.Top + line.Baseline, Paint);
+                    else
+                        target.DrawTextOnPath(line.Value, path, start, drawRect.Top + line.Baseline, Paint);
+                }
+
+                start += (float)(measureText + style.Spacing);
+            }
+
+
+            if (lines != null)
+            {
+                var left = drawRect.Left;
+            }
+        }
+
+        private static void DrawText(SKCanvas target, Line[] lines, LabelStyle style, SKRect drawRect)
+        {
             if (lines != null)
             {
                 var left = drawRect.Left;
                 foreach (var line in lines)
                 {
-                    if (style.HorizontalAlignment == LabelStyle.HorizontalAlignmentEnum.Center)
+                    if (style.Justify == LabelStyle.HorizontalAlignmentEnum.Center)
                         target.DrawText(line.Value, (float)(left + (drawRect.Width - line.Width) * 0.5), drawRect.Top + line.Baseline, Paint);
-                    else if (style.HorizontalAlignment == LabelStyle.HorizontalAlignmentEnum.Right)
+                    else if (style.Justify == LabelStyle.HorizontalAlignmentEnum.Right)
                         target.DrawText(line.Value, left + drawRect.Width - line.Width, drawRect.Top + line.Baseline, Paint);
                     else
                         target.DrawText(line.Value, left, drawRect.Top + line.Baseline, Paint);
                 }
             }
-            else
-                target.DrawText(text, drawRect.Left, drawRect.Top + baseline, Paint);
         }
 
         private static float CalcHorizontalAlignment(LabelStyle.HorizontalAlignmentEnum horizontalAligment)

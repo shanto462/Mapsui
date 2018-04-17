@@ -16,7 +16,7 @@ namespace Mapsui.Rendering.Skia
 
             if (style is LabelStyle labelStyle)    // case 1) LabelStyle
             {
-                LabelRenderer.Draw(canvas, labelStyle, feature, (float) destination.X, (float) destination.Y, 
+                LabelRenderer.Draw(canvas, viewport, labelStyle, feature, (float) destination.X, (float) destination.Y, 
                     opacity);
             }
             else if (style is SymbolStyle)

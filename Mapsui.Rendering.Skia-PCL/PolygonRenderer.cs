@@ -62,6 +62,8 @@ namespace Mapsui.Rendering.Skia
                     {
                         PaintFill.StrokeWidth = lineWidth;
                         PaintFill.Style = SKPaintStyle.Fill;
+                        PaintFill.PathEffect = null;
+                        PaintFill.Shader = null;
                         PaintFill.Color = fillColor.ToSkia(opacity);
                         canvas.DrawPath(path, PaintFill);
                     }
@@ -69,6 +71,7 @@ namespace Mapsui.Rendering.Skia
                     {
                         PaintFill.StrokeWidth = 1;
                         PaintFill.Style = SKPaintStyle.Stroke;
+                        PaintFill.Shader = null;
                         PaintFill.Color = fillColor.ToSkia(opacity);
                         float scale = 10.0f;
                         SKPath fillPath = new SKPath();
@@ -117,14 +120,17 @@ namespace Mapsui.Rendering.Skia
                                 break;
                             case FillStyle.Bitmap:
                                 PaintFill.Style = SKPaintStyle.Fill;
-                                PaintFill.Shader = symbolCache.GetOrCreate(vectorStyle.Fill.BitmapId).Bitmap.ToShader(SKShaderTileMode.Repeat, SKShaderTileMode.Repeat);
+                                var image = GetImage(symbolCache, vectorStyle.Fill.BitmapId);
+                                if (image != null)
+                                    PaintFill.Shader = image.ToShader(SKShaderTileMode.Repeat, SKShaderTileMode.Repeat);
                                 break;
                             case FillStyle.BitmapRotated:
                                 PaintFill.Style = SKPaintStyle.Fill;
-                                SKImage bitmap = symbolCache.GetOrCreate(vectorStyle.Fill.BitmapId).Bitmap;
-                                PaintFill.Shader = bitmap.ToShader(SKShaderTileMode.Repeat,
-                                    SKShaderTileMode.Repeat,
-                                    SKMatrix.MakeRotation((float)(viewport.Rotation * System.Math.PI / 180.0f), bitmap.Width >> 1, bitmap.Height >> 1));
+                                image = GetImage(symbolCache, vectorStyle.Fill.BitmapId);
+                                if (image != null)
+                                    PaintFill.Shader = image.ToShader(SKShaderTileMode.Repeat,
+                                        SKShaderTileMode.Repeat,
+                                        SKMatrix.MakeRotation((float)(viewport.Rotation * System.Math.PI / 180.0f), image.Width >> 1, image.Height >> 1));
                                 break;
                         }
 
@@ -153,6 +159,26 @@ namespace Mapsui.Rendering.Skia
                     canvas.DrawPath(path, PaintStroke);
                 }
             }
+        }
+
+        private static SKImage GetImage(SymbolCache symbolCache, int bitmapId)
+        {
+            var bitmapInfo = symbolCache.GetOrCreate(bitmapId);
+            if (bitmapInfo.Type == BitmapType.Bitmap)
+                return bitmapInfo.Bitmap;
+            else if (bitmapInfo.Type == BitmapType.Sprite)
+            {
+                var sprite = bitmapInfo.Sprite;
+                if (sprite.Data == null)
+                {
+                    var bitmapAtlas = symbolCache.GetOrCreate(sprite.Atlas);
+                    sprite.Data = bitmapAtlas.Bitmap.Subset(new SKRectI(sprite.X, sprite.Y, sprite.X + sprite.Width,
+                        sprite.Y + sprite.Height));
+                }
+                return ((SKImage)sprite.Data);
+            }
+
+            return null;
         }
 
         private static SKPath ToSkia(IViewport viewport, Polygon polygon)

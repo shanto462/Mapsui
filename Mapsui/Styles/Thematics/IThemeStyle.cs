@@ -29,6 +29,6 @@ namespace Mapsui.Styles.Thematics
         /// </summary>
         /// <param name="feature">Feature to calculate style for</param>
         /// <returns>Style to use for this feature and this resolution</returns>
-        IStyle GetStyle(IFeature feature, double resolution);
+        IStyle GetStyle(IFeature feature);
 	}
 }

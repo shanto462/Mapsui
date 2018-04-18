@@ -12,7 +12,7 @@ namespace Mapsui.Styles.Thematics
             _method = method;
         }
 
-        public IStyle GetStyle(IFeature attribute, double resolution)
+        public IStyle GetStyle(IFeature attribute)
         {
             return _method(attribute);
         }

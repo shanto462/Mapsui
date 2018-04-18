@@ -37,7 +37,7 @@ namespace Mapsui.Rendering
 
                 foreach (var feature in features)
                 {
-                    if (layerStyle is IThemeStyle) style = (layerStyle as IThemeStyle).GetStyle(feature, viewport.Resolution);
+                    if (layerStyle is IThemeStyle) style = (layerStyle as IThemeStyle).GetStyle(feature);
                     if (style == null || style.Enabled == false || style.MinVisible > viewport.Resolution || style.MaxVisible < viewport.Resolution) continue;
 
                     if (style is StyleCollection styles) // The ThemeStyle can again return a StyleCollection
@@ -69,7 +69,7 @@ namespace Mapsui.Rendering
                 }
             }
 
-            System.Diagnostics.Debug.WriteLine($"Darwn {i} features");
+            System.Diagnostics.Debug.WriteLine($"Drawn {i} features");
         }
 
         private static IStyle[] ToArray(IStyle style)

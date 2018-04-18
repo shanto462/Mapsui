@@ -151,7 +151,7 @@ namespace Mapsui.UI
 
         private static IStyle HandleThemeStyle(IFeature feature, IStyle style, double resolution)
         {
-            if (style is IThemeStyle themeStyle) return themeStyle.GetStyle(feature, resolution);
+            if (style is IThemeStyle themeStyle) return themeStyle.GetStyle(feature);
             return style;
         }
 

@@ -1,7 +1,10 @@
 ﻿using Mapsui.Geometries;
 using Mapsui.Providers;
+using Mapsui.Styles;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
@@ -12,8 +15,11 @@ namespace Mapsui.VectorTiles
     public class SymbolProvider : IProvider
     {
         private readonly Map _map;
+        private long _lastTime = DateTime.Now.Ticks;
 
-        public IList<Symbol> Symbols = new List<Symbol>();
+        public ObservableCollection<Symbol> Symbols { get; }
+
+        public List<IFeature> Bucket { get; } = new List<IFeature>();
 
         public string CRS { get; set; }
 
@@ -23,7 +29,55 @@ namespace Mapsui.VectorTiles
         {
             _map = map;
 
-            map.Viewport.ViewportChanged += ViewportChanged;
+            _map.Viewport.ViewportChanged += ViewportChanged;
+
+            Symbols = new ObservableCollection<Symbol>();
+
+            Symbols.CollectionChanged += SymbolsCollectionChanged;
+        }
+
+        private void SymbolsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            //if (DateTime.Now.Ticks - _lastTime > 5000000)
+            //    Task.Run(() => UpdateData());
+        }
+
+        private void UpdateData()
+        {
+            List<Symbol> allSymbols;
+
+            lock (Symbols)
+            {
+                allSymbols = Symbols.OrderBy<Symbol, int>((s) => s.Rank).ToList();
+            }
+
+            Bucket.Clear();
+
+            int maxSymbols = 0;
+
+            foreach (var symbol in allSymbols)
+            {
+                var feature = symbol.Feature;
+
+                feature.Styles.Clear();
+                feature.Styles.Add(symbol.IconStyle);
+                feature.Styles.Add(symbol.LabelStyle);
+
+                Bucket.Add(feature);
+
+                maxSymbols++;
+
+                if (maxSymbols > 9)
+                    break;
+            }
+        }
+
+        public void Add(Symbol symbol)
+        {
+            lock (Symbols)
+            {
+                Symbols.Add(symbol);
+            }
         }
 
         private void ViewportChanged(object sender, PropertyChangedEventArgs e)
@@ -41,7 +95,7 @@ namespace Mapsui.VectorTiles
 
         public IEnumerable<IFeature> GetFeaturesInView(BoundingBox box, double resolution)
         {
-            return new List<IFeature>();
+            return Bucket;
         }
     }
 }

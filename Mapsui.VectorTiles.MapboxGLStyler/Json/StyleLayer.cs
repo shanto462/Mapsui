@@ -49,31 +49,31 @@ namespace Mapsui.VectorTiles.MapboxGLStyler.Json
         [JsonProperty("ref")]
         public string Ref { get; set; }
 
-        private float? _zoomMax;
+        private float? _maxZoom;
 
         [JsonProperty("maxzoom")]
-        public float? ZoomMax
+        public float? MaxZoom
         {
-            get => _zoomMax;
+            get => _maxZoom;
             set
             {
-                _zoomMax = value;
-                if (_zoomMax != null)
-                    MinVisible = (_zoomMax ?? 30).ToResolution();
+                _maxZoom = value;
+                if (_maxZoom != null)
+                    MinVisible = (_maxZoom ?? 30).ToResolution();
             }
         }
 
-        private float? _zoomMin;
+        private float? _minZoom;
 
         [JsonProperty("minzoom")]
-        public float? ZoomMin
+        public float? MinZoom
         {
-            get => _zoomMin;
+            get => _minZoom;
             set
             {
-                _zoomMin = value;
-                if (_zoomMin != null)
-                    MaxVisible = (_zoomMin ?? 0f).ToResolution();
+                _minZoom = value;
+                if (_minZoom != null)
+                    MaxVisible = (_minZoom ?? 0f).ToResolution();
             }
         }
 
@@ -84,6 +84,8 @@ namespace Mapsui.VectorTiles.MapboxGLStyler.Json
         public double MaxVisible { get; set; } = double.PositiveInfinity;
 
         public IThemeStyle Style { get; set; }
+
+        public int ZIndex { get; set; }
 
         public override string ToString()
         {

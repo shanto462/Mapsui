@@ -380,7 +380,7 @@ namespace Mapsui.VectorTiles.MapboxGLStyler.Converter
 
             styleLabel.Font.Size = 16;
 
-            var styleSymbol = new SymbolStyle
+            var styleIcon = new SymbolStyle
             {
                 Enabled = false,
             };
@@ -674,12 +674,12 @@ namespace Mapsui.VectorTiles.MapboxGLStyler.Converter
 
                 if (!string.IsNullOrEmpty(name) && spriteAtlas.ContainsKey(name) && spriteAtlas[name].Atlas >= 0)
                 {
-                    styleSymbol.BitmapId = spriteAtlas[name].Atlas;
+                    styleIcon.BitmapId = spriteAtlas[name].Atlas;
                 }
                 else
                 {
                     // No sprite found
-                    styleSymbol.BitmapId = -1;
+                    styleIcon.BitmapId = -1;
                     // Log information
                     Logging.Logger.Log(Logging.LogLevel.Information, $"Sprite {name} not found");
                 }
@@ -721,7 +721,7 @@ namespace Mapsui.VectorTiles.MapboxGLStyler.Converter
                 //   Scale factor for icon. 1 is original size, 3 triples the size.
                 if (layout?.IconSize != null)
                 {
-                    styleSymbol.SymbolScale = layout.IconSize.Evaluate(context.Zoom);
+                    styleIcon.SymbolScale = layout.IconSize.Evaluate(context.Zoom);
                 }
 
                 // icon-rotate
@@ -745,7 +745,7 @@ namespace Mapsui.VectorTiles.MapboxGLStyler.Converter
                 {
                     var x = layout.IconOffset[0];
                     var y = layout.IconOffset[1];
-                    styleSymbol.SymbolOffset = new Offset(x, y, false);
+                    styleIcon.SymbolOffset = new Offset(x, y, false);
                 }
 
                 // icon-opacity
@@ -753,7 +753,7 @@ namespace Mapsui.VectorTiles.MapboxGLStyler.Converter
                 //   The opacity at which the icon will be drawn.
                 if (layout?.IconOpacity != null)
                 {
-                    styleSymbol.Opacity = layout.IconOpacity.Evaluate(context.Zoom);
+                    styleIcon.Opacity = layout.IconOpacity.Evaluate(context.Zoom);
                 }
 
                 // icon-color
@@ -789,19 +789,16 @@ namespace Mapsui.VectorTiles.MapboxGLStyler.Converter
                 result.Add(styleLabel);
             }
 
-            if (styleSymbol.BitmapId >= 0)
+            if (styleIcon.BitmapId >= 0)
             {
-                styleSymbol.Enabled = true;
+                styleIcon.Enabled = true;
 
-                result.Add(styleSymbol);
+                result.Add(styleIcon);
             }
 
             if (symbolProvider != null)
             {
-                symbolProvider.Symbols.Add(new Symbol
-                {
-                    Feature = context.Feature,
-                });
+                symbolProvider.Add(new Symbol(context.Feature, styleIcon, styleLabel, styleLayer.ZIndex));
 
                 // If there is an SymbolLayer, than it handles drawing of symbols
                 result = null;

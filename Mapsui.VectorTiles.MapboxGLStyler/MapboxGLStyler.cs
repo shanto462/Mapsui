@@ -45,8 +45,13 @@ namespace Mapsui.VectorTiles.MapboxGLStyler
             // Create SymbolProvider, that belongs to all Styles and VectorTileLayers
             var symbolProvider = new SymbolProvider(map);
 
+            // Normally background is the first style layer
+            var zIndex = 0;
+
             foreach (var styleLayer in styleJson.StyleLayers)
             {
+                styleLayer.ZIndex = zIndex++;
+
                 if (styleLayer.Type.Equals("background") && styleLayer.Paint.BackgroundColor != null)
                 {
                     Background = styleLayer.Paint.BackgroundColor;

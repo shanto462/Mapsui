@@ -1,18 +1,21 @@
 ﻿using Mapsui.Styles;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Mapsui.VectorTiles
 {
     public class Symbol
     {
         public VectorTileFeature Feature;
-        public string Icon;
-        public string Label;
-        public IStyle IconStyle;
-        public IStyle LabelStyle;
+        public IStyle IconStyle { get; }
+        public IStyle LabelStyle { get; }
+        public int ZIndex { get; }
+        public int Rank { get => Feature?.Rank ?? int.MaxValue; }
+
+        public Symbol(VectorTileFeature feature, IStyle iconStyle, IStyle labelStyle, int zIndex)
+        {
+            Feature = feature;
+            IconStyle = iconStyle;
+            LabelStyle = labelStyle;
+            ZIndex = zIndex;
+        }
     }
 }

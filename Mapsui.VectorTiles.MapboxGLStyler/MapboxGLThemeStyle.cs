@@ -34,7 +34,10 @@ namespace Mapsui.VectorTiles.MapboxGLStyler
 
             // Do this only once
             if (_viewport != null)
-                _viewport.ViewportChanged += (s, e) => { Zoom = FromResolution(_viewport.Resolution); ZoomLevel = (int)Math.Floor(Zoom); };
+                _viewport.ViewportChanged += (s, e) => {
+                    Zoom = FromResolution(_viewport.Resolution);
+                    ZoomLevel = (int)Math.Floor(Zoom);
+                };
         }
 
         public IStyle GetStyle(IFeature f)
@@ -42,17 +45,13 @@ namespace Mapsui.VectorTiles.MapboxGLStyler
             if (_viewport == null)
                 return null;
 
-            float resolution = (float)_viewport.Resolution;
-
             if (f.Geometry is IRaster)
             {
-                return _converter.ConvertRasterLayer(Zoom, _styleLayer);
+                return _converter.ConvertRasterLayer(new EvaluationContext(Zoom), _styleLayer);
             }
 
-            if (!(f is VectorTileFeature))
+            if (!(f is VectorTileFeature feature))
                 return null;
-
-            var feature = (VectorTileFeature) f;
 
             // Is this style for given feature?
             if (_styleLayer.SourceLayerHash != feature.VectorTileLayer)

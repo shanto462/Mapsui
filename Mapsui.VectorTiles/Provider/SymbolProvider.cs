@@ -2,12 +2,11 @@
 using Mapsui.Providers;
 using Mapsui.Styles;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Mapsui.VectorTiles
@@ -16,8 +15,7 @@ namespace Mapsui.VectorTiles
     {
         private readonly Map _map;
         private long _lastTime = DateTime.Now.Ticks;
-
-        public ObservableCollection<Symbol> Symbols { get; }
+        private ConcurrentBag<Symbol> _symbols;
 
         public List<IFeature> Bucket { get; } = new List<IFeature>();
 
@@ -31,60 +29,68 @@ namespace Mapsui.VectorTiles
 
             _map.Viewport.ViewportChanged += ViewportChanged;
 
-            Symbols = new ObservableCollection<Symbol>();
-
-            Symbols.CollectionChanged += SymbolsCollectionChanged;
+            _symbols = new ConcurrentBag<Symbol>();
         }
 
-        private void SymbolsCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        private void SymbolsChanged()
         {
-            //if (DateTime.Now.Ticks - _lastTime > 5000000)
-            //    Task.Run(() => UpdateData());
+            if (DateTime.Now.Ticks - _lastTime > 50000)
+                Task.Run(() => UpdateData());
         }
 
         private void UpdateData()
         {
             List<Symbol> allSymbols;
 
-            lock (Symbols)
+            allSymbols = _symbols.ToArray().OrderBy<Symbol, int>((s) => s.Rank).ToList();
+
+            lock (Bucket)
             {
-                allSymbols = Symbols.OrderBy<Symbol, int>((s) => s.Rank).ToList();
+                Bucket.Clear();
+
+                int maxSymbols = 0;
+
+                foreach (var symbol in allSymbols)
+                {
+                    var feature = symbol.Feature;
+
+                    feature.Styles.Clear();
+                    if (symbol.IconStyle is SymbolStyle && ((SymbolStyle)symbol.IconStyle).BitmapId >= 0)
+                        feature.Styles.Add(symbol.IconStyle);
+                    feature.Styles.Add(symbol.LabelStyle);
+
+                    Bucket.Add(feature);
+
+                    maxSymbols++;
+
+                    if (maxSymbols > 9)
+                        break;
+                }
             }
 
-            Bucket.Clear();
-
-            int maxSymbols = 0;
-
-            foreach (var symbol in allSymbols)
-            {
-                var feature = symbol.Feature;
-
-                feature.Styles.Clear();
-                feature.Styles.Add(symbol.IconStyle);
-                feature.Styles.Add(symbol.LabelStyle);
-
-                Bucket.Add(feature);
-
-                maxSymbols++;
-
-                if (maxSymbols > 9)
-                    break;
-            }
+            _lastTime = DateTime.Now.Ticks;
         }
 
         public void Add(Symbol symbol)
         {
-            lock (Symbols)
-            {
-                Symbols.Add(symbol);
-            }
+            _symbols.Add(symbol);
+
+            SymbolsChanged();
+        }
+
+        public void Clear()
+        {
+            var newSymbols = new ConcurrentBag<Symbol>();
+            Interlocked.Exchange<ConcurrentBag<Symbol>>(ref _symbols, newSymbols);
+
+            SymbolsChanged();
         }
 
         private void ViewportChanged(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(Viewport.Resolution))
             {
-                Symbols.Clear();
+                Clear();
             }
         }
 

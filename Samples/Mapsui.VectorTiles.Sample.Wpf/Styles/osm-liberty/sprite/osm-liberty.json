@@ -1441,14 +1441,14 @@
     "x": 189,
     "y": 148
   },
-  "swimming_11": {
+  "swimming_pool_11": {
     "height": 17,
     "pixelRatio": 1,
     "width": 17,
     "x": 456,
     "y": 85
   },
-  "swimming_15": {
+  "swimming_pool_15": {
     "height": 21,
     "pixelRatio": 1,
     "width": 21,
@@ -1497,28 +1497,28 @@
     "x": 21,
     "y": 169
   },
-  "toilet_11": {
+  "toilets_11": {
     "height": 17,
     "pixelRatio": 1,
     "width": 17,
     "x": 269,
     "y": 106
   },
-  "toilet_15": {
+  "toilets_15": {
     "height": 21,
     "pixelRatio": 1,
     "width": 21,
     "x": 42,
     "y": 169
   },
-  "town-hall_11": {
+  "town_hall_11": {
     "height": 17,
     "pixelRatio": 1,
     "width": 17,
     "x": 286,
     "y": 106
   },
-  "town-hall_15": {
+  "town_hall_15": {
     "height": 21,
     "pixelRatio": 1,
     "width": 21,

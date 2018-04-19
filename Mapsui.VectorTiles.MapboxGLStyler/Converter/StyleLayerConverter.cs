@@ -10,6 +10,18 @@ namespace Mapsui.VectorTiles.MapboxGLStyler.Converter
 {
     public class StyleLayerConverter
     {
+        private float? _lastRasterZoom = float.NegativeInfinity;
+        private float? _lastFillZoom = float.NegativeInfinity;
+        private float? _lastLineZoom = float.NegativeInfinity;
+        private Paint _lastRasterPaint = null;
+        private Paint _lastFillPaint = null;
+        private Paint _lastLinePaint = null;
+        private Layout _lastFillLayout = null;
+        private Layout _lastLineLayout = null;
+        private IStyle _lastRasterStyle = null;
+        private IList<IStyle> _lastFillStyle = null;
+        private IList<IStyle> _lastLineStyle = null;
+
         /// <summary>
         /// Convert given context with Mapbox GL styling layer to a Mapsui Style list
         /// </summary>
@@ -39,7 +51,7 @@ namespace Mapsui.VectorTiles.MapboxGLStyler.Converter
             return new List<IStyle>();
         }
 
-        public IStyle ConvertRasterLayer(float contextZoom, StyleLayer styleLayer)
+        public IStyle ConvertRasterLayer(EvaluationContext context, StyleLayer styleLayer)
         {
             // visibility
             //   Optional enum. One of visible, none. Defaults to visible.
@@ -49,6 +61,10 @@ namespace Mapsui.VectorTiles.MapboxGLStyler.Converter
 
             var paint = styleLayer.Paint;
 
+            // Some sort of caching
+            if (_lastRasterZoom == context.Zoom && _lastRasterPaint == paint)
+                return _lastRasterStyle;
+
             var styleRaster = new RasterStyle();
 
             // raster-opacity
@@ -56,7 +72,7 @@ namespace Mapsui.VectorTiles.MapboxGLStyler.Converter
             //   The opacity at which the image will be drawn.
             if (paint?.RasterOpacity != null)
             {
-                styleRaster.Opacity = paint.RasterOpacity.Evaluate(contextZoom);
+                styleRaster.Opacity = paint.RasterOpacity.Evaluate(context.Zoom);
             }
 
             // raster-hue-rotate
@@ -83,6 +99,9 @@ namespace Mapsui.VectorTiles.MapboxGLStyler.Converter
             //   Optional number.Units in milliseconds.Defaults to 300.
             //   Fade duration when a new tile is added.
 
+            _lastRasterZoom = (float)context.Zoom;
+            _lastRasterStyle = styleRaster;
+
             return styleRaster;
         }
 
@@ -92,6 +111,15 @@ namespace Mapsui.VectorTiles.MapboxGLStyler.Converter
             if (context.Feature.GeometryType == GeometryType.Point)
                 return null;
 
+            var paint = styleLayer.Paint;
+
+            // Some sort of caching
+            if (_lastFillZoom == context.Zoom && _lastFillPaint == paint)
+            {
+                // TODO: Replace text fields with correct values
+                return _lastFillStyle;
+            }
+
             List<IStyle> result = new List<IStyle>();
 
             // visibility
@@ -99,8 +127,6 @@ namespace Mapsui.VectorTiles.MapboxGLStyler.Converter
             //   The display of this layer. none hides this layer.
             if (styleLayer.Layout?.Visibility != null && styleLayer.Layout.Visibility.Equals("none"))
                 return result;
-
-            var paint = styleLayer.Paint;
 
             var styleVector = new VectorStyle();
             
@@ -188,21 +214,31 @@ namespace Mapsui.VectorTiles.MapboxGLStyler.Converter
 
             result.Add(styleVector);
 
+            _lastFillZoom = context.Zoom;
+            _lastFillPaint = paint;
+            _lastFillStyle = result;
+
             return result;
         }
 
         public IList<IStyle> ConvertLineLayer(EvaluationContext context, StyleLayer styleLayer, Dictionary<string, Styles.Sprite> spriteAtlas)
         {
-            List<IStyle> result = new List<IStyle>();
-
             // visibility
             //   Optional enum. One of visible, none. Defaults to visible.
             //   The display of this layer. none hides this layer.
             if (styleLayer.Layout?.Visibility != null && styleLayer.Layout.Visibility.Equals("none"))
-                return result;
+                return new List<IStyle>();
 
             var paint = styleLayer.Paint;
             var layout = styleLayer.Layout;
+
+            if (_lastLineZoom == context.Zoom && _lastLinePaint == paint && _lastLineLayout == layout)
+            {
+                // TODO: Replace text fields with correct values
+                return _lastLineStyle;
+            }
+
+            List<IStyle> result = new List<IStyle>();
 
             var styleVector = new VectorStyle();
 
@@ -346,6 +382,10 @@ namespace Mapsui.VectorTiles.MapboxGLStyler.Converter
             styleVector.Enabled = true;
 
             result.Add(styleVector);
+
+            _lastLineZoom = context.Zoom;
+            _lastLinePaint = paint;
+            _lastLineStyle = result;
 
             return result;
         }

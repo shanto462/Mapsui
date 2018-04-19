@@ -165,6 +165,7 @@ namespace Mapsui.VectorTiles.MapboxGLStyler
                 CRS = "EPSG:3857",
                 MinVisible = 0,
                 MaxVisible = double.PositiveInfinity,
+                Style = null,
             });
 
             if (styleJson.Center != null)
@@ -192,6 +193,7 @@ namespace Mapsui.VectorTiles.MapboxGLStyler
             {
                 MinVisible = ((float?)source?.ZoomMax)?.ToResolution() ?? 0,
                 MaxVisible = ((float?)source?.ZoomMin)?.ToResolution() ?? double.PositiveInfinity,
+                Style = null,
             };
         }
 
@@ -211,6 +213,7 @@ namespace Mapsui.VectorTiles.MapboxGLStyler
                 CRS = "EPSG:3857",
                 MinVisible = (source.ZoomMax ?? 30).ToResolution(),
                 MaxVisible = (source.ZoomMin ?? 0).ToResolution(),
+                Style = null,
             };
 
             return vectorLayer;

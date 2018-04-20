@@ -234,7 +234,6 @@ namespace Mapsui.VectorTiles.MapboxGLStyler.Converter
 
             if (_lastLineZoom == context.Zoom && _lastLinePaint == paint && _lastLineLayout == layout)
             {
-                // TODO: Replace text fields with correct values
                 return _lastLineStyle;
             }
 

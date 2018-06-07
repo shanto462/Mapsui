@@ -22,7 +22,7 @@ namespace Mapsui.Samples.Wpf
             MapControl.ErrorMessageChanged += MapErrorMessageChanged;
             MapControl.FeatureInfo += MapControlFeatureInfo;
             MapControl.MouseMove += MapControlOnMouseMove;
-            MapControl.RotationLock = true;
+            MapControl.RotationLock = false;
             MapControl.UnSnapRotationDegrees = 30;
             MapControl.ReSnapRotationDegrees = 5;
 
@@ -111,6 +111,7 @@ namespace Mapsui.Samples.Wpf
             allSamples["ThemeStyle (Desktop)"] = ThemeStyleSample.CreateMap;
             allSamples["Tiles on disk (Desktop)"] = MapTilerSample.CreateMap;
             allSamples["WMS (Desktop)"] = WmsSample.CreateMap;
+            allSamples["Slow WMS (Desktop)"] = SlowWmsSample.CreateMap;
             return allSamples;
         }
 

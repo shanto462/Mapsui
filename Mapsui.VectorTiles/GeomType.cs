@@ -1,5 +1,8 @@
 ﻿namespace Mapsui.VectorTiles
 {
+    /// <summary>
+    /// OSM geometry type
+    /// </summary>
     public enum GeometryType
     {
         Unknown = 0,

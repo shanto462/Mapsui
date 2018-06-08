@@ -1,5 +1,8 @@
 ﻿namespace Mapsui.VectorTiles
 {
+    /// <summary>
+    /// Context for which the style should be evaluated
+    /// </summary>
     public class EvaluationContext
     {
         public float? Zoom { get; }

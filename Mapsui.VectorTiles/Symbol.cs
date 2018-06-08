@@ -2,6 +2,9 @@
 
 namespace Mapsui.VectorTiles
 {
+    /// <summary>
+    /// Represents a symbol with or without text
+    /// </summary>
     public class Symbol
     {
         public VectorTileFeature Feature;

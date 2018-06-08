@@ -15,7 +15,10 @@ namespace Mapsui.Rendering.Skia
 
             foreach (var widget in widgets)
             {
-                renders[widget.GetType()].Draw(canvas, screenWidth, screenHeight, widget, layerOpacity);
+                if (widget != null)
+                {
+                    renders[widget.GetType()]?.Draw(canvas, screenWidth, screenHeight, widget, layerOpacity);
+                }
             }
         }
     }

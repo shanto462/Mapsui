@@ -10,6 +10,9 @@ using Newtonsoft.Json.Linq;
 
 namespace Mapsui.VectorTiles
 {
+    /// <summary>
+    /// Represents a class for features, that could be find in vector maps
+    /// </summary>
     public sealed class VectorTileFeature : IFeature
     {
         public string Id { get; set; }

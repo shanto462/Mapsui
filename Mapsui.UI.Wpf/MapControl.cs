@@ -12,7 +12,7 @@ using System.Windows.Shapes;
 using Mapsui.Fetcher;
 using Mapsui.Layers;
 using Mapsui.Providers;
-using Mapsui.Rendering.Xaml;
+using Mapsui.Rendering.Skia;
 using Mapsui.Utilities;
 using Mapsui.Widgets;
 using SkiaSharp.Views.Desktop;
@@ -125,14 +125,14 @@ namespace Mapsui.UI.Wpf
                 {
                     WpfCanvas.Visibility = Visibility.Collapsed;
                     SkiaCanvas.Visibility = Visibility.Visible;
-                    Renderer = new Rendering.Skia.MapRenderer();
+                    Renderer = new MapRenderer();
                     RefreshGraphics();
                 }
                 else
                 {
                     SkiaCanvas.Visibility = Visibility.Collapsed;
                     WpfCanvas.Visibility = Visibility.Visible;
-                    Renderer = new MapRenderer();
+                    Renderer = new Rendering.Xaml.MapRenderer();
                     RefreshGraphics();
                 }
                 _renderMode = value;
@@ -529,8 +529,13 @@ namespace Mapsui.UI.Wpf
 
             if (_mouseDown && !PanLock)
             {
-                if (_previousMousePosition == default(Geometries.Point))
-                    return; // It turns out that sometimes MouseMove+Pressed is called before MouseDown
+                if (_previousMousePosition == null || _previousMousePosition.IsEmpty())
+                {
+                    // Usually MapControlMouseLeftButton down initializes _previousMousePosition but in some
+                    // situations this can happen. So far I could only reproduce this by putting a breakpoint
+                    // and continuing.
+                    return; 
+                }
 
                 _currentMousePosition = e.GetPosition(this).ToMapsui(); //Needed for both MouseMove and MouseWheel event
 

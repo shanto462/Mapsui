@@ -1,4 +1,3 @@
-using Mapsui.Fetcher;
 using CoreFoundation;
 using Foundation;
 using UIKit;
@@ -7,7 +6,6 @@ using System.ComponentModel;
 using System.Linq;
 using CoreGraphics;
 using Mapsui.Geometries;
-using Mapsui.Logging;
 using Mapsui.Widgets;
 using SkiaSharp.Views.iOS;
 
@@ -209,61 +207,15 @@ namespace Mapsui.UI.iOS
         {
             RefreshGraphics();
         }
-
-        private void MapPropertyChanged(object sender, PropertyChangedEventArgs e)
+        
+        private void RunOnUIThread(Action action)
         {
-            if (e.PropertyName == nameof(Layers.Layer.Enabled))
-            {
-                RefreshGraphics();
-            }
-            else if (e.PropertyName == nameof(Layers.Layer.Opacity))
-            {
-                RefreshGraphics();
-            }
+            DispatchQueue.MainQueue.DispatchAsync(action);
         }
-
-        private void MapDataChanged(object sender, DataChangedEventArgs e)
-        {
-            string errorMessage;
-
-            DispatchQueue.MainQueue.DispatchAsync(delegate
-            {
-                try
-                {
-                    if (e == null)
-                    {
-                        errorMessage = "MapDataChanged Unexpected error: DataChangedEventArgs can not be null";
-                        Console.WriteLine(errorMessage);
-                    }
-                    else if (e.Cancelled)
-                    {
-                        errorMessage = "MapDataChanged: Cancelled";
-                        System.Diagnostics.Debug.WriteLine(errorMessage);
-                    }
-                    else if (e.Error is System.Net.WebException)
-                    {
-                        errorMessage = "MapDataChanged WebException: " + e.Error.Message;
-                        Console.WriteLine(errorMessage);
-                    }
-                    else if (e.Error != null)
-                    {
-                        errorMessage = "MapDataChanged errorMessage: " + e.Error.GetType() + ": " + e.Error.Message;
-                        Console.WriteLine(errorMessage);
-                    }
-
-                    RefreshGraphics();
-                }
-                catch (Exception exception)
-                {
-                    Logger.Log(LogLevel.Warning, "Unexpected exception in MapDataChanged", exception);
-                }
-            });
-        }
-
+        
         public void RefreshGraphics()
         {
-            SetNeedsDisplay();
-            _canvas?.SetNeedsDisplay(); // todo: check if this is needed.
+            RunOnUIThread(SetNeedsDisplay);
         }
 
         public void RefreshData()

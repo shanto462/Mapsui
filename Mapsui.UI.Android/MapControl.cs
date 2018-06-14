@@ -1,13 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using Android.Content;
 using Android.Graphics;
+using Android.OS;
 using Android.Util;
 using Android.Views;
-using Mapsui.Fetcher;
-using Mapsui.Layers;
 using Mapsui.Logging;
 using Mapsui.Widgets;
 using SkiaSharp.Views.Android;
@@ -76,6 +74,11 @@ namespace Mapsui.UI.Android
         {
             base.OnSizeChanged(width, height, oldWidth, oldHeight);
             PushSizeOntoViewport(width, height);
+        }
+
+        private void RunOnUIThread(Action action)
+        {
+            new Handler(Looper.MainLooper).Post(action);
         }
 
         private void CanvasOnPaintSurface(object sender, SKPaintSurfaceEventArgs args)
@@ -243,35 +246,7 @@ namespace Mapsui.UI.Android
         {
             RefreshGraphics();
         }
-
-        private void MapPropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(Layer.Enabled))
-            {
-                RefreshGraphics();
-            }
-            else if (e.PropertyName == nameof(Layer.Opacity))
-            {
-                RefreshGraphics();
-            }
-        }
-
-        private void MapDataChanged(object sender, DataChangedEventArgs e)
-        {
-            if (e.Cancelled || e.Error != null)
-            {
-                Logger.Log(LogLevel.Warning, "An error occurred while fetching data", e.Error);
-            }
-            else if (e.Cancelled)
-            {
-                Logger.Log(LogLevel.Warning, "Fetching data was cancelled", e.Error);
-            }
-            else // no problems
-            {
-                RefreshGraphics();
-            }
-        }
-
+      
         protected override void OnDraw(Canvas canvas)
         {
             Invalidate();
@@ -280,7 +255,23 @@ namespace Mapsui.UI.Android
 
         public void RefreshGraphics()
         {
-            PostInvalidate();
+            RunOnUIThread(RefreshGraphicsWithTryCatch);
+        }
+
+        private void RefreshGraphicsWithTryCatch()
+        {
+            try
+            {
+                PostInvalidate();
+            }
+            catch (ObjectDisposedException e)
+            {
+                // See issue: https://github.com/Mapsui/Mapsui/issues/433
+                // What seems to be happening. The Activity is Disposed. Appently it's children get Disposed
+                // explicitly by some in Xamarin. During this Dispose the MessageCenter, which is itself not
+                // disposed get another notification to call RefreshGraphics.
+                Logger.Log(LogLevel.Warning, "This can happen when the parent Activity is disposing.", e);
+            }
         }
 
         public void RefreshData()

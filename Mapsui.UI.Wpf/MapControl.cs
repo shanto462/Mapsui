@@ -1,15 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
-using System.Net;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
-using Mapsui.Fetcher;
 using Mapsui.Layers;
 using Mapsui.Providers;
 using Mapsui.Rendering.Skia;
@@ -110,8 +107,6 @@ namespace Mapsui.UI.Wpf
 
         public bool ZoomToBoxMode { get; set; }
 
-        public string ErrorMessage { get; private set; }
-
         public Canvas WpfCanvas { get; } = CreateWpfRenderCanvas();
 
         private SKElement SkiaCanvas { get; } = CreateSkiaRenderElement();
@@ -157,7 +152,6 @@ namespace Mapsui.UI.Wpf
             };
         }
 
-        public event EventHandler ErrorMessageChanged;
         public event EventHandler<ViewChangedEventArgs> ViewChanged;
         public event EventHandler<FeatureInfoEventArgs> FeatureInfo;
         public event EventHandler ViewportInitialized;
@@ -165,22 +159,6 @@ namespace Mapsui.UI.Wpf
         private void MapRefreshGraphics(object sender, EventArgs eventArgs)
         {
             RefreshGraphics();
-        }
-
-        private void MapPropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            if (!Dispatcher.CheckAccess()) Dispatcher.BeginInvoke(new Action(() => MapPropertyChanged(sender, e)));
-            else
-            {
-                if (e.PropertyName == nameof(Layer.Enabled))
-                {
-                    RefreshGraphics();
-                }
-                else if (e.PropertyName == nameof(Layer.Opacity))
-                {
-                    RefreshGraphics();
-                }
-            }
         }
 
         private void OnViewChanged(bool userAction = false)
@@ -192,7 +170,7 @@ namespace Mapsui.UI.Wpf
 
         public void RefreshGraphics()
         {
-            Dispatcher.BeginInvoke(new Action(InvalidateCanvas));
+            RunOnUIThread(InvalidateCanvas);
         }
 
         internal void InvalidateCanvas()
@@ -240,11 +218,6 @@ namespace Mapsui.UI.Wpf
                 _map.ZoomMode, _map.ZoomLimits, _map.Resolutions, _map.Envelope);
 
             ZoomMiddle();
-        }
-
-        private void OnErrorMessageChanged(EventArgs e)
-        {
-            ErrorMessageChanged?.Invoke(this, e);
         }
 
         private static void OnResolutionChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs e)
@@ -394,38 +367,15 @@ namespace Mapsui.UI.Wpf
             ReleaseMouseCapture();
         }
 
-        public void MapDataChanged(object sender, DataChangedEventArgs e) // todo: make private?
+        private void RunOnUIThread(Action action)
         {
             if (!Dispatcher.CheckAccess())
             {
-                Dispatcher.BeginInvoke(new DataChangedEventHandler(MapDataChanged), sender, e);
+                Dispatcher.BeginInvoke(action);
             }
             else
             {
-                if (e == null)
-                {
-                    ErrorMessage = "Unexpected error: DataChangedEventArgs can not be null";
-                    OnErrorMessageChanged(EventArgs.Empty);
-                }
-                else if (e.Cancelled)
-                {
-                    ErrorMessage = "Cancelled";
-                    OnErrorMessageChanged(EventArgs.Empty);
-                }
-                else if (e.Error is WebException)
-                {
-                    ErrorMessage = "WebException: " + e.Error.Message;
-                    OnErrorMessageChanged(EventArgs.Empty);
-                }
-                else if (e.Error != null)
-                {
-                    ErrorMessage = e.Error.GetType() + ": " + e.Error.Message;
-                    OnErrorMessageChanged(EventArgs.Empty);
-                }
-                else // no problems
-                {
-                    RefreshGraphics();
-                }
+                action();
             }
         }
 
@@ -600,10 +550,7 @@ namespace Mapsui.UI.Wpf
 
         private void ClearBBoxDrawing()
         {
-            Dispatcher.BeginInvoke(new Action(() =>
-            {
-                _selectRectangle.Visibility = Visibility.Collapsed;
-            }));
+            RunOnUIThread(() => _selectRectangle.Visibility = Visibility.Collapsed);
         }
 
         private void DrawBbox(Point newPos)
@@ -639,7 +586,7 @@ namespace Mapsui.UI.Wpf
             if (Map.Envelope == null) return;
             if (ActualWidth.IsNanOrZero()) return;
             Map.Viewport.Resolution = Math.Max(Map.Envelope.Width / ActualWidth, Map.Envelope.Height / ActualHeight);
-            Map.Viewport.Center = Map.Envelope.GetCentroid();
+            Map.Viewport.Center = Map.Envelope.Centroid;
         }
 
         private static void OnManipulationInertiaStarting(object sender, ManipulationInertiaStartingEventArgs e)

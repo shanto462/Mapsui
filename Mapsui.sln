@@ -98,30 +98,39 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docfx", "docfx", "{97458DE1-C297-4DED-AECB-5FEFED2B5610}"
 	ProjectSection(SolutionItems) = preProject
 		docfx\build-site.cmd = docfx\build-site.cmd
+		docfx\docfx.json = docfx\docfx.json
+		docfx\index.md = docfx\index.md
+		docfx\metadata.json = docfx\metadata.json
+		docfx\toc.yml = docfx\toc.yml
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "mapsui", "mapsui", "{F9644AFA-4A28-42D3-AC64-4718D037CC59}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "documentation", "documentation", "{6F159183-6CC2-4D97-A0D6-55FC6F630FD5}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "documentation", "documentation", "{7D976D37-0542-4A0D-99E6-6BAA180E7011}"
 	ProjectSection(SolutionItems) = preProject
-		docfx\mapsui\documentation\Async-Fetching.md = docfx\mapsui\documentation\Async-Fetching.md
-		docfx\mapsui\documentation\Contributors-Guidelines.md = docfx\mapsui\documentation\Contributors-Guidelines.md
-		docfx\mapsui\documentation\Development-constraints.md = docfx\mapsui\documentation\Development-constraints.md
-		docfx\mapsui\documentation\documentation.md = docfx\mapsui\documentation\documentation.md
-		docfx\mapsui\documentation\getting-started-android.md = docfx\mapsui\documentation\getting-started-android.md
-		docfx\mapsui\documentation\getting-started-wpf.md = docfx\mapsui\documentation\getting-started-wpf.md
-		docfx\mapsui\documentation\Home.md = docfx\mapsui\documentation\Home.md
-		docfx\mapsui\documentation\How-to-work-with-Mapsui.md = docfx\mapsui\documentation\How-to-work-with-Mapsui.md
-		docfx\mapsui\documentation\Mapsui-2.0.md = docfx\mapsui\documentation\Mapsui-2.0.md
-		docfx\mapsui\documentation\Mapsui-Components.md = docfx\mapsui\documentation\Mapsui-Components.md
-		docfx\mapsui\documentation\NuGet-of-latest-build.md = docfx\mapsui\documentation\NuGet-of-latest-build.md
-		docfx\mapsui\documentation\Renderers.md = docfx\mapsui\documentation\Renderers.md
-		docfx\mapsui\documentation\Rendering-Tests.md = docfx\mapsui\documentation\Rendering-Tests.md
-		docfx\mapsui\documentation\Roadmap.md = docfx\mapsui\documentation\Roadmap.md
-		docfx\mapsui\documentation\samples.md = docfx\mapsui\documentation\samples.md
-		docfx\mapsui\documentation\skia-scale.md = docfx\mapsui\documentation\skia-scale.md
-		docfx\mapsui\documentation\toc.md = docfx\mapsui\documentation\toc.md
+		docfx\documentation\Async-Fetching.md = docfx\documentation\Async-Fetching.md
+		docfx\documentation\Contributors-Guidelines.md = docfx\documentation\Contributors-Guidelines.md
+		docfx\documentation\Development-constraints.md = docfx\documentation\Development-constraints.md
+		docfx\documentation\documentation.md = docfx\documentation\documentation.md
+		docfx\documentation\getting-started-android.md = docfx\documentation\getting-started-android.md
+		docfx\documentation\getting-started-wpf.md = docfx\documentation\getting-started-wpf.md
+		docfx\documentation\Home.md = docfx\documentation\Home.md
+		docfx\documentation\How-to-work-with-Mapsui.md = docfx\documentation\How-to-work-with-Mapsui.md
+		docfx\documentation\Mapsui-2.0.md = docfx\documentation\Mapsui-2.0.md
+		docfx\documentation\Mapsui-Components.md = docfx\documentation\Mapsui-Components.md
+		docfx\documentation\NuGet-of-latest-build.md = docfx\documentation\NuGet-of-latest-build.md
+		docfx\documentation\Renderers.md = docfx\documentation\Renderers.md
+		docfx\documentation\Rendering-Tests.md = docfx\documentation\Rendering-Tests.md
+		docfx\documentation\Roadmap.md = docfx\documentation\Roadmap.md
+		docfx\documentation\samples.md = docfx\documentation\samples.md
+		docfx\documentation\skia-scale.md = docfx\documentation\skia-scale.md
+		docfx\documentation\toc.md = docfx\documentation\toc.md
 	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "images", "images", "{52C84C7C-1D60-454E-804A-1F9691BD61A3}"
+	ProjectSection(SolutionItems) = preProject
+		docfx\documentation\images\brutile_fetcher.png = docfx\documentation\images\brutile_fetcher.png
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "api", "api", "{5BB9C8BA-0FF4-40E7-BC36-8D671A951C82}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
@@ -1465,6 +1474,9 @@ Global
 		{9E7FB4C9-3EC0-407B-8D98-02F27963A478} = {969DB691-49FB-4785-98F4-2112CC1BA7C4}
 		{F9644AFA-4A28-42D3-AC64-4718D037CC59} = {97458DE1-C297-4DED-AECB-5FEFED2B5610}
 		{6F159183-6CC2-4D97-A0D6-55FC6F630FD5} = {F9644AFA-4A28-42D3-AC64-4718D037CC59}
+		{7D976D37-0542-4A0D-99E6-6BAA180E7011} = {97458DE1-C297-4DED-AECB-5FEFED2B5610}
+		{52C84C7C-1D60-454E-804A-1F9691BD61A3} = {7D976D37-0542-4A0D-99E6-6BAA180E7011}
+		{5BB9C8BA-0FF4-40E7-BC36-8D671A951C82} = {97458DE1-C297-4DED-AECB-5FEFED2B5610}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {22D684C3-0BD3-4D8A-AB23-748FB5527F6F}

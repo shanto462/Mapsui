@@ -2,6 +2,10 @@
 using Mapsui.Geometries.Utilities;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Net;
+using Mapsui.Fetcher;
+using Mapsui.Logging;
 using Mapsui.Rendering;
 using Mapsui.Rendering.Skia;
 
@@ -166,6 +170,52 @@ namespace Mapsui.UI.Wpf
         {
             RefreshData();
             RefreshGraphics();
+        }
+
+        private void MapDataChanged(object sender, DataChangedEventArgs e)
+        {
+            RunOnUIThread(() =>
+            {
+                try
+                {
+                    if (e == null)
+                    {
+                        Logger.Log(LogLevel.Warning, "Unexpected error: DataChangedEventArgs can not be null");
+                    }
+                    else if (e.Cancelled)
+                    {
+                        Logger.Log(LogLevel.Warning, "Fetching data was cancelled", e.Error);
+                    }
+                    else if (e.Error is WebException)
+                    {
+                        Logger.Log(LogLevel.Warning, "A WebException occurred. Do you have internet?", e.Error);
+                    }
+                    else if (e.Error != null)
+                    {
+                        Logger.Log(LogLevel.Warning, "An error occurred while fetching data", e.Error);
+                    }
+                    else // no problems
+                    {
+                        RefreshGraphics();
+                    }
+                }
+                catch (Exception exception)
+                {
+                    Logger.Log(LogLevel.Warning, $"Unexpected exception in {nameof(MapDataChanged)}", exception);
+                }
+            });
+        }
+
+        private void MapPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(Layers.Layer.Enabled))
+            {
+                RefreshGraphics();
+            }
+            else if (e.PropertyName == nameof(Layers.Layer.Opacity))
+            {
+                RefreshGraphics();
+            }
         }
 
         public Map Map

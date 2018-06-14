@@ -16,8 +16,6 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA f
 
 using System;
-using System.ComponentModel;
-using System.Net;
 using System.Threading.Tasks;
 using Windows.Devices.Sensors;
 using Windows.Foundation;
@@ -30,9 +28,6 @@ using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Shapes;
-using Mapsui.Fetcher;
-using Mapsui.Layers;
-using Mapsui.Logging;
 using Mapsui.Utilities;
 using Mapsui.Widgets;
 using SkiaSharp.Views.UWP;
@@ -77,8 +72,7 @@ namespace Mapsui.UI.Uwp
 
             var orientationSensor = SimpleOrientationSensor.GetDefault();
             if (orientationSensor != null)
-                orientationSensor.OrientationChanged += (sender, args) =>
-                    Task.Run(() => Dispatcher.RunAsync(CoreDispatcherPriority.Normal, Refresh));
+                orientationSensor.OrientationChanged += (sender, args) => RunOnUIThread(Refresh);
         }
 
         private void OnDoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
@@ -120,36 +114,14 @@ namespace Mapsui.UI.Uwp
             };
         }
 
-        public bool ZoomToBoxMode { get; set; }
-
         private void MapRefreshGraphics(object o, EventArgs eventArgs)
         {
             RefreshGraphics();
         }
 
-        public string ErrorMessage { get; private set; }
-
         public bool ZoomLocked { get; set; }
 
-        public event EventHandler ErrorMessageChanged;
         public event EventHandler<ViewChangedEventArgs> ViewChanged;
-
-        private async void MapPropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            await Dispatcher.RunAsync(CoreDispatcherPriority.Low, () => MapPropertyChanged(e));
-        }
-
-        private void MapPropertyChanged(PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(Layer.Enabled))
-            {
-                RefreshGraphics();
-            }
-            else if (e.PropertyName == nameof(Layer.Opacity))
-            {
-                RefreshGraphics();
-            }
-        }
 
         private void MapControl_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
         {
@@ -208,7 +180,7 @@ namespace Mapsui.UI.Uwp
 
         public void RefreshGraphics()
         {
-            _canvas.Invalidate();
+            RunOnUIThread(() => _canvas?.Invalidate());
         }
 
         public void RefreshData()
@@ -220,31 +192,6 @@ namespace Mapsui.UI.Uwp
         {
             _map?.ClearCache();
             RefreshGraphics();
-        }
-
-        public void ZoomIn()
-        {
-            if (ZoomLocked) return;
-            if (!_map.Viewport.Initialized) return;
-
-            Map.Viewport.Resolution = ZoomHelper.ZoomIn(_map.Resolutions, Map.Viewport.Resolution);
-
-            OnViewChanged();
-        }
-
-        public void ZoomOut()
-        {
-            if (ZoomLocked) return;
-            if (!_map.Viewport.Initialized) return;
-
-            Map.Viewport.Resolution = ZoomHelper.ZoomOut(_map.Resolutions, Map.Viewport.Resolution);
-
-            OnViewChanged();
-        }
-
-        protected void OnErrorMessageChanged(EventArgs e)
-        {
-            ErrorMessageChanged?.Invoke(this, e);
         }
 
         private void MapControlLoaded(object sender, RoutedEventArgs e)
@@ -269,43 +216,10 @@ namespace Mapsui.UI.Uwp
             Map.Viewport.Width = ActualWidth;
             Map.Viewport.Height = ActualHeight;
         }
-        
-        public void MapDataChanged(object sender, DataChangedEventArgs e)
+
+        private void RunOnUIThread(Action action)
         {
-            if (!Dispatcher.HasThreadAccess)
-            {
-                Task.Run(() => Dispatcher.RunAsync(
-                    CoreDispatcherPriority.Normal, () => MapDataChanged(sender, e)));
-            }
-            else
-            {
-                try
-                {
-                    if (e.Cancelled)
-                    {
-                        ErrorMessage = "Cancelled";
-                        OnErrorMessageChanged(EventArgs.Empty);
-                    }
-                    else if (e.Error is WebException)
-                    {
-                        ErrorMessage = "WebException: " + e.Error.Message;
-                        OnErrorMessageChanged(EventArgs.Empty);
-                    }
-                    else if (e.Error != null)
-                    {
-                        ErrorMessage = e.Error.GetType() + ": " + e.Error.Message;
-                        OnErrorMessageChanged(EventArgs.Empty);
-                    }
-                    else // no problems
-                    {
-                        RefreshGraphics();
-                    }
-                }
-                catch (Exception exception)
-                {
-                    Logger.Log(LogLevel.Warning, "Unexpected exception in MapDataChanged", exception);
-                }
-            }
+            Task.Run(() => Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => action()));
         }
 
         private void Canvas_PaintSurface(object sender, SKPaintSurfaceEventArgs e)
@@ -358,7 +272,7 @@ namespace Mapsui.UI.Uwp
             if (Map.Envelope == null) return;
             if (ActualWidth.IsNanOrZero()) return;
             Map.Viewport.Resolution = Map.Envelope.Width / ActualWidth;
-            Map.Viewport.Center = Map.Envelope.GetCentroid();
+            Map.Viewport.Center = Map.Envelope.Centroid;
 
             OnViewChanged();
         }
@@ -402,6 +316,7 @@ namespace Mapsui.UI.Uwp
             ViewportLimiter.Limit(_map.Viewport, _map.ZoomMode, _map.ZoomLimits, _map.Resolutions,
                 _map.PanMode, _map.PanLimits, _map.Envelope);
             RefreshGraphics();
+            _map.RefreshData(false);
             OnViewChanged(true);
 
             e.Handled = true;

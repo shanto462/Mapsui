@@ -49,6 +49,7 @@ namespace Mapsui.Rendering.Skia
 
                 using (var paint = new SKPaint())
                 {
+                    paint.IsAntialias = true;
                     paint.IsStroke = true;
                     paint.StrokeWidth = lineWidth;
                     paint.Color = lineColor.ToSkia(opacity);

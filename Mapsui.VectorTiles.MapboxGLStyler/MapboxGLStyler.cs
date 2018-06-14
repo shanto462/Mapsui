@@ -175,7 +175,7 @@ namespace Mapsui.VectorTiles.MapboxGLStyler
                 map.NavigateTo(Center);
             }
 
-            map.ZoomMode = ZoomMode.None;
+            map.ZoomMode = ZoomMode.Unlimited;
         }
 
         public Color Background { get; }

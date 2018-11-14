@@ -1,13 +1,16 @@
 ﻿using Mapsui.Geometries;
-using Mapsui.Geometries.Utilities;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Net;
 using Mapsui.Fetcher;
+using Mapsui.Layers;
 using Mapsui.Logging;
 using Mapsui.Rendering;
 using Mapsui.Rendering.Skia;
+using Mapsui.Widgets;
+using System.Runtime.CompilerServices;
 
 #if __ANDROID__
 namespace Mapsui.UI.Android
@@ -21,122 +24,129 @@ namespace Mapsui.UI
 namespace Mapsui.UI.Wpf
 #endif
 {
-    public partial class MapControl
+    public partial class MapControl : INotifyPropertyChanged
     {
-        /// <summary>
-        /// Display scale for converting screen position to real position
-        /// </summary>
-        private float _scale;
-
         private Map _map;
 
-        /// <summary>
-        /// Saver for center before last pinch movement
-        /// </summary>
-        private Point _previousCenter = new Point();
-        
-        /// <summary>
-        /// Allow map panning through touch or mouse
-        /// </summary>
-        public bool PanLock { get; set; }
+        private MapLock _lock = new MapLock { RotationLock = true };
 
         /// <summary>
-        /// Allow a rotation with a pinch gesture
+        /// Handles, which interaction with the map is locked 
         /// </summary>
-        public bool RotationLock { get; set; } = true;
+        public MapLock Lock
+        {
+            get { return _lock; }
+            set
+            {
+                if (_lock != value)
+                {
+                    _lock = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
 
-        /// <summary>
-        /// Allow zooming though touch or mouse
-        /// </summary>
-        public bool ZoomLock { get; set; }
+        private double _unSnapRotationDegrees = 0;
 
         /// <summary>
         /// After how many degrees start rotation to take place
         /// </summary>
-        public double UnSnapRotationDegrees { get; set; }
+        public double UnSnapRotationDegrees
+        {
+            get { return _unSnapRotationDegrees; }
+            set
+            {
+                if (_unSnapRotationDegrees != value)
+                {
+                    _unSnapRotationDegrees = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        private double _reSnapRotationDegrees = 0;
 
         /// <summary>
         /// With how many degrees from 0 should map snap to 0 degrees
         /// </summary>
-        public double ReSnapRotationDegrees { get; set; }
-        
-        public IRenderer Renderer { get; set; } = new MapRenderer();
+        public double ReSnapRotationDegrees
+        {
+            get { return _reSnapRotationDegrees; }
+            set
+            {
+                if (_reSnapRotationDegrees != value)
+                {
+                    _reSnapRotationDegrees = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        private IRenderer _renderer = new MapRenderer();
 
         /// <summary>
-        /// Unsubscribe from map events </summary>
+        /// Renderer that is used from this MapControl
+        /// </summary>
+        public IRenderer Renderer
+        {
+            get { return _renderer; }
+            set
+            {
+                if (_renderer != value)
+                {
+                    _renderer = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        private readonly LimitedViewport _viewport = new LimitedViewport();
+
+        /// <summary>
+        /// Viewport holding information about visible part of the map. Viewport can never be null.
+        /// </summary>
+        public IReadOnlyViewport Viewport => _viewport;
+
+        /// <summary>
+        /// Handles all manipulations of the map viewport
+        /// </summary>
+        public INavigator Navigator { get; private set; }
+
+        /// <summary>
+        /// Called when the viewport is initialized
+        /// </summary>
+        public event EventHandler ViewportInitialized; //todo: Consider to use the Viewport PropertyChanged
+
+        /// <summary>
+        ///  Called whenever a feature in one of the layers in InfoLayers is hitten by a click 
+        /// </summary>
+        public event EventHandler<MapInfoEventArgs> Info;
+
+        /// <summary>
+        /// Called whenever a property is changed
+        /// </summary>
+#if __FORMS__
+        public new event PropertyChangedEventHandler PropertyChanged;
+
+        protected override void OnPropertyChanged([CallerMemberName] string propertyName = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+#else
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void OnPropertyChanged([CallerMemberName] string propertyName = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+#endif
+
+        /// <summary>
+        /// Unsubscribe from map events 
+        /// </summary>
         public void Unsubscribe()
         {
             UnsubscribeFromMapEvents(_map);
-        }
-
-        /// <summary>
-        /// Converting function for world to screen
-        /// </summary>
-        /// <param name="worldPosition">Position in world coordinates</param>
-        /// <returns>Position in screen coordinates</returns>
-        public Point WorldToScreen(Point worldPosition)
-        {
-            return WorldToScreen(Map.Viewport, _scale, worldPosition);
-        }
-
-        /// <summary>
-        /// Converting function for screen to world
-        /// </summary>
-        /// <param name="screenPosition">Position in screen coordinates</param>
-        /// <returns>Position in world coordinates</returns>
-        public Point ScreenToWorld(Point screenPosition)
-        {
-            return ScreenToWorld(Map.Viewport, _scale, screenPosition);
-        }
-
-        /// <summary>
-        /// Converting function for world to screen respecting scale
-        /// </summary>
-        /// <param name="viewport">Viewport</param>
-        /// <param name="scale">Scale</param>
-        /// <param name="worldPosition">Position in world coordinates</param>
-        /// <returns>Position in screen coordinates</returns>
-        public Point WorldToScreen(IViewport viewport, float scale, Point worldPosition)
-        {
-            var screenPosition = viewport.WorldToScreen(worldPosition);
-            return new Point(screenPosition.X * scale, screenPosition.Y * scale);
-        }
-
-        /// <summary>
-        /// Converting function for screen to world respecting scale
-        /// </summary>
-        /// <param name="viewport">Viewport</param>
-        /// <param name="scale">Scale</param>
-        /// <param name="screenPosition">Position in screen coordinates</param>
-        /// <returns>Position in world coordinates</returns>
-        public Point ScreenToWorld(IViewport viewport, float scale, Point screenPosition)
-        {
-            var worldPosition = viewport.ScreenToWorld(screenPosition.X * scale, screenPosition.Y * scale);
-            return new Point(worldPosition.X, worldPosition.Y);
-        }
-
-        private static (Point centre, double radius, double angle) GetPinchValues(List<Point> locations)
-        {
-            if (locations.Count < 2)
-                throw new ArgumentException();
-
-            double centerX = 0;
-            double centerY = 0;
-
-            foreach (var location in locations)
-            {
-                centerX += location.X;
-                centerY += location.Y;
-            }
-
-            centerX = centerX / locations.Count;
-            centerY = centerY / locations.Count;
-
-            var radius = Algorithms.Distance(centerX, centerY, locations[0].X, locations[0].Y);
-
-            var angle = Math.Atan2(locations[1].Y - locations[0].Y, locations[1].X - locations[0].X) * 180.0 / Math.PI;
-
-            return (new Point(centerX, centerY), radius, angle);
         }
 
         /// <summary>
@@ -147,7 +157,6 @@ namespace Mapsui.UI.Wpf
         {
             map.DataChanged += MapDataChanged;
             map.PropertyChanged += MapPropertyChanged;
-            map.RefreshGraphics += MapRefreshGraphics;
         }
 
         /// <summary>
@@ -161,11 +170,13 @@ namespace Mapsui.UI.Wpf
             {
                 temp.DataChanged -= MapDataChanged;
                 temp.PropertyChanged -= MapPropertyChanged;
-                temp.RefreshGraphics -= MapRefreshGraphics;
                 temp.AbortFetch();
             }
         }
 
+        /// <summary>
+        /// Refresh data of the map and than repaint it
+        /// </summary>
         public void Refresh()
         {
             RefreshData();
@@ -205,6 +216,7 @@ namespace Mapsui.UI.Wpf
                 }
             });
         }
+        // ReSharper disable RedundantNameQualifier - needed for iOS for disambiguation
 
         private void MapPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
@@ -216,8 +228,24 @@ namespace Mapsui.UI.Wpf
             {
                 RefreshGraphics();
             }
+            else if (e.PropertyName == nameof(Map.BackColor))
+            {
+                RefreshGraphics();
+            }
+            else if (e.PropertyName == nameof(Layers.Layer.DataSource))
+            {
+                RefreshData(); // There is a new datasource so let's fetch the new data.
+            }
+            else if (e.PropertyName == nameof(Map.Layers))
+            {
+                Refresh();
+            }
         }
+        // ReSharper restore RedundantNameQualifier
 
+        /// <summary>
+        /// Map holding data for which is shown in this MapControl
+        /// </summary>
         public Map Map
         {
             get => _map;
@@ -234,11 +262,144 @@ namespace Mapsui.UI.Wpf
                 if (_map != null)
                 {
                     SubscribeToMapEvents(_map);
-                    _map.RefreshData(true);
+                    Navigator = new Navigator(_map, _viewport);
+                    _viewport.Map = Map;
+                    _viewport.Limiter = Map.Limiter;
+                    if (Viewport.HasSize) _map.Home(Navigator); // If size is not set yet Home will be called at set size. This is okay.
                 }
 
-                RefreshGraphics();
+                Refresh();
+                OnPropertyChanged();
             }
+        }
+
+        /// <inheritdoc />
+        public Point ToPixels(Point coordinateInDeviceIndependentUnits)
+        {
+            return new Point(
+                coordinateInDeviceIndependentUnits.X * PixelDensity,
+                coordinateInDeviceIndependentUnits.Y * PixelDensity);
+        }
+
+        /// <inheritdoc />
+        public Point ToDeviceIndependentUnits(Point coordinateInPixels)
+        {
+            return new Point(coordinateInPixels.X / PixelDensity, coordinateInPixels.Y / PixelDensity);
+        }
+
+        private void OnViewportInitialized()
+        {
+            ViewportInitialized?.Invoke(this, EventArgs.Empty);
+        }
+
+        /// <summary>
+        /// Refresh data of Map, but don't paint it
+        /// </summary>
+        public void RefreshData()
+        {
+            _map?.RefreshData(Viewport.Extent, Viewport.Resolution, true);
+        }
+
+        private void OnInfo(MapInfoEventArgs mapInfoEventArgs)
+        {
+            if (mapInfoEventArgs == null) return;
+
+            Info?.Invoke(this, mapInfoEventArgs);
+        }
+
+        private void WidgetTouched(IWidget widget, Point screenPosition)
+        {
+            if (widget is Hyperlink hyperlink)
+            {
+                OpenBrowser(hyperlink.Url);
+            }
+
+            widget.HandleWidgetTouched(Navigator, screenPosition);
+        }
+
+        /// <inheritdoc />
+        public MapInfo GetMapInfo(Point screenPosition, int margin = 0)
+        {
+            return MapInfoHelper.GetMapInfo(Map.Layers.Where(l => l.IsMapInfoLayer), Viewport,
+                screenPosition, Renderer.SymbolCache, margin);
+        }
+
+        /// <inheritdoc />
+        public MapInfo GetMapInfo(IEnumerable<ILayer> layers, Point screenPosition, int margin = 0)
+        {
+            return MapInfoHelper.GetMapInfo(layers, Viewport,
+                screenPosition, Renderer.SymbolCache, margin);
+        }
+
+        /// <summary>
+        /// Check, if a widget or feature at a given screen position is clicked/tapped
+        /// </summary>
+        /// <param name="layers">The layers to query for MapInfo</param>
+        /// <param name="widgets">The Map widgets</param>
+        /// <param name="viewport">The current Viewport</param>
+        /// <param name="screenPosition">Screen position to check for widgets and features</param>
+        /// <param name="startScreenPosition">Screen position of Viewport/MapControl</param>
+        /// <param name="symbolCache">Cache for symbols to determin size</param>
+        /// <param name="widgetCallback">Callback, which is called when Widget is hiten</param>
+        /// <param name="numTaps">Number of clickes/taps</param>
+        /// <returns>True, if something done </returns>
+        private static MapInfoEventArgs InvokeInfo(IEnumerable<ILayer> layers, IEnumerable<IWidget> widgets, 
+            IReadOnlyViewport viewport, Point screenPosition, Point startScreenPosition, ISymbolCache symbolCache,
+            Action<IWidget, Point> widgetCallback, int numTaps)
+        {
+            var layerWidgets = layers.Select(l => l.Attribution).Where(a => a != null);
+            var allWidgets = layerWidgets.Concat(widgets).ToList(); // Concat layer widgets and map widgets.
+
+            // First check if a Widget is clicked. In the current design they are always on top of the map.
+            var widget = WidgetTouch.GetTouchedWidget(screenPosition, startScreenPosition, allWidgets);
+            if (widget != null)
+            {
+                // todo:
+                // How should widgetCallback have a handled type thing?
+                // Widgets should be iterated through rather than getting a single widget, 
+                // based on Z index and then called until handled = true; Ordered By highest Z
+                widgetCallback(widget, screenPosition);
+                return null;
+            }
+
+            var mapInfo = MapInfoHelper.GetMapInfo(layers, viewport, screenPosition, symbolCache);
+
+            if (mapInfo != null)
+            {
+                return new MapInfoEventArgs
+                {
+                    MapInfo = mapInfo,
+                    NumTaps = numTaps,
+                    Handled = false
+                };
+            }
+
+            return null;
+        }
+
+        private void SetViewportSize()
+        {
+            var hadSize = Viewport.HasSize;
+            _viewport.SetSize(ViewportWidth, ViewportHeight);
+
+            if (!hadSize && Viewport.HasSize) // Is Size Initialized?
+            {
+                Map?.Home(Navigator); // When Map is null here Home will be called on Map set. So this is okay.
+                OnViewportInitialized();
+            }
+
+            Refresh();
+        }
+
+        /// <summary>
+        /// Clear cache and repaint map
+        /// </summary>
+        public void Clear()
+        {
+            // not sure if we need this method
+            _map?.ClearCache();
+            RefreshGraphics();
         }
     }
 }
+

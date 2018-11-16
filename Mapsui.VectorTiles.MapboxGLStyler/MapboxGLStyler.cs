@@ -26,10 +26,9 @@ namespace Mapsui.VectorTiles.MapboxGLStyler
     {
         MapboxGL styleJson;
 
-        private int SpriteBitmap;
         private Dictionary<string, Styles.Sprite> SpriteAtlas = new Dictionary<string, Styles.Sprite>();
 
-        public MapboxGLStyler(Stream input, Map map)
+        public MapboxGLStyler(Stream input, IMapControl mapControl)
         {
             using (var reader = new StreamReader(input))
                 styleJson = JsonConvert.DeserializeObject<MapboxGL>(reader.ReadToEnd());
@@ -44,7 +43,7 @@ namespace Mapsui.VectorTiles.MapboxGLStyler
             var styleLayerConverter = new StyleLayerConverter();
 
             // Create SymbolProvider, that belongs to all Styles and VectorTileLayers
-            var symbolProvider = new SymbolProvider(map);
+            var symbolProvider = new SymbolProvider(mapControl);
 
             // Normally background is the first style layer
             var zIndex = 0;
@@ -56,7 +55,7 @@ namespace Mapsui.VectorTiles.MapboxGLStyler
                 if (styleLayer.Type.Equals("background") && styleLayer.Paint.BackgroundColor != null)
                 {
                     Background = styleLayer.Paint.BackgroundColor;
-                    map.BackColor = Background;
+//                    mapControl.BackColor = Background;
                 }
 
                 // Create filters for each style layer
@@ -64,7 +63,7 @@ namespace Mapsui.VectorTiles.MapboxGLStyler
                     styleLayer.Filter = filterConverter.ConvertFilter(styleLayer.NativeFilter);
 
                 // Create ThemeStyles for each style layer
-                styleLayer.Style = new MapboxGLThemeStyle(styleLayerConverter, styleLayer, SpriteAtlas, map.Viewport, symbolProvider)
+                styleLayer.Style = new MapboxGLThemeStyle(styleLayerConverter, styleLayer, SpriteAtlas, mapControl.Viewport, symbolProvider)
                 {
                     MinVisible = styleLayer.MinVisible,
                     MaxVisible = styleLayer.MaxVisible
@@ -102,7 +101,7 @@ namespace Mapsui.VectorTiles.MapboxGLStyler
                                 ((StyleCollection)rasterLayer.Style).Add(styleLayer.Style);
                             }
 
-                            map.Layers.Add(rasterLayer);
+                            mapControl.Map.Layers.Add(rasterLayer);
                         }
 
                         break;
@@ -136,17 +135,18 @@ namespace Mapsui.VectorTiles.MapboxGLStyler
                         var vectorTilelayer = CreateVectorLayer(sourceJson, symbolProvider);
                         // Layer has a list of ThemeStyles, one for each style in style file
                         vectorTilelayer.Style = new StyleCollection();
-                        // Add all ThemeStyles for this layer
+                        // Add only styles for this layer
                         foreach (var styleLayer in styleJson.StyleLayers)
                         {
-                            ((StyleCollection)vectorTilelayer.Style).Add(styleLayer.Style);
+                            if (vectorTilelayer.InternalLayers.Contains(styleLayer.SourceLayer))
+                                ((StyleCollection)vectorTilelayer.Style).Add(styleLayer.Style);
                         }
                         // Add bounds to bounds of SymbolProvider
                         symbolProvider.Bounds.Join(((VectorTileProvider)vectorTilelayer.DataSource).Bounds);
                         // Only when Style avalible
                         vectorTilelayer.Enabled = ((StyleCollection)vectorTilelayer.Style).Count > 0;
                         // Add layer to map
-                        map.Layers.Add(vectorTilelayer);
+                        mapControl.Map.Layers.Add(vectorTilelayer);
                         break;
                     case "geoJson":
                         break;
@@ -160,7 +160,7 @@ namespace Mapsui.VectorTiles.MapboxGLStyler
             }
 
             // Now add SymbolLayer at top most on map
-            map.Layers.Add(new Layer("Symbols")
+            mapControl.Map.Layers.Add(new Layer("Symbols")
             {
                 DataSource = symbolProvider,
                 CRS = "EPSG:3857",
@@ -172,10 +172,10 @@ namespace Mapsui.VectorTiles.MapboxGLStyler
             if (styleJson.Center != null)
             {
                 Center = Projection.SphericalMercator.FromLonLat(styleJson.Center[0], styleJson.Center[1]);
-                map.NavigateTo(Center);
+//                mapControl.NavigateTo(Center);
             }
 
-            map.ZoomMode = ZoomMode.Unlimited;
+//            mapControl.ZoomMode = ZoomMode.Unlimited;
         }
 
         public Color Background { get; }
@@ -216,6 +216,12 @@ namespace Mapsui.VectorTiles.MapboxGLStyler
                 MaxVisible = (source.ZoomMin ?? 0).ToResolution(),
                 Style = null,
             };
+
+            // Add all types which VectorLayer contains
+            foreach(var layer in source.VectorLayers)
+            {
+                vectorLayer.InternalLayers.Add(layer.Id);
+            }
 
             return vectorLayer;
         }

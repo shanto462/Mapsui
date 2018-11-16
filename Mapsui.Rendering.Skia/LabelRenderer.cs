@@ -41,7 +41,7 @@ namespace Mapsui.Rendering.Skia
                 horizontalAlignment: style.HorizontalAlignment, verticalAlignment: style.VerticalAlignment);
         }
 
-        public static void Draw(SKCanvas canvas, IViewport viewport, LabelStyle style, IFeature feature, float x, float y,
+        public static void Draw(SKCanvas canvas, IReadOnlyViewport viewport, LabelStyle style, IFeature feature, float x, float y,
             float layerOpacity)
         {
             var text = style.GetLabelText(feature);
@@ -52,7 +52,7 @@ namespace Mapsui.Rendering.Skia
                 DrawLabelOnPath(canvas, viewport, feature.Geometry, style, text, layerOpacity);
         }
 
-        private static void DrawLabelOnPath(SKCanvas target, IViewport viewport, Geometries.IGeometry geometry, LabelStyle style, string text, float layerOpacity)
+        private static void DrawLabelOnPath(SKCanvas target, IReadOnlyViewport viewport, Geometries.IGeometry geometry, LabelStyle style, string text, float layerOpacity)
         {
             UpdatePaint(style, layerOpacity);
 

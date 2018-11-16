@@ -60,7 +60,7 @@ namespace Mapsui.VectorTiles.MapboxGLFormat
                     // Draw only features, that are symbols/text or in bounding box
                     foreach (var feature in features)
                     {
-                        if (feature.Geometry is Point || feature.Geometry is MultiPoint || box.Intersects(feature.Geometry.GetBoundingBox()))
+                        if (feature.Geometry is Point || feature.Geometry is MultiPoint || box.Intersects(feature.Geometry.BoundingBox))
                             result.Add(feature);
                     }
                     //result.AddRange(features);

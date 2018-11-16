@@ -52,15 +52,15 @@ namespace Mapsui.VectorTiles.Sample.Wpf
 
             try
             {
-                var jsonStyler = new MapboxGLStyler.MapboxGLStyler(jsonStyleStream, MapControl.Map);
+                var jsonStyler = new MapboxGLStyler.MapboxGLStyler(jsonStyleStream, MapControl);
 
                 if (jsonStyler.SpriteUrl != null)
                 {
                     jsonStyler.CreateSprites(jsonStyleAtlas, jsonStyleAtlasBitmap);
                 }
 
-                if (jsonStyler.Center != null)
-                    MapControl.Map.NavigateTo(jsonStyler.Center);
+//                if (jsonStyler.Center != null)
+//                    MapControl.Map.NavigateTo(jsonStyler.Center);
             }
             catch (Exception e)
             {
@@ -89,16 +89,16 @@ namespace Mapsui.VectorTiles.Sample.Wpf
             //    Style = null,
             //});
 
-            MapControl.Map.Viewport.ViewportChanged += ViewportChanged;
-            MapControl.Map.Viewport.Rotation = 0;
-            MapControl.Map.NavigateTo(new Geometries.Point(825536.9246620, 5423536.19435341));
-            MapControl.Map.NavigateTo(MapControl.Map.Resolutions[20]);
+            MapControl.Viewport.ViewportChanged += ViewportChanged;
+//            MapControl.Viewport.Rotation = 0;
+//            MapControl.NavigateTo(new Geometries.Point(825536.9246620, 5423536.19435341));
+//            MapControl.NavigateTo(MapControl.Map.Resolutions[20]);
         }
 
         private void ViewportChanged(object sender, PropertyChangedEventArgs e)
         {
-            LabelResolution.Content = "Resolution: " + MapControl.Map.Viewport.Resolution.ToString();
-            LabelZoom.Content = "Zoom: "+ FromResolution(MapControl.Map.Viewport.Resolution).ToString();
+            LabelResolution.Content = "Resolution: " + MapControl.Viewport.Resolution.ToString();
+            LabelZoom.Content = "Zoom: "+ FromResolution(MapControl.Viewport.Resolution).ToString();
         }
 
         private double FromResolution(double resolution)

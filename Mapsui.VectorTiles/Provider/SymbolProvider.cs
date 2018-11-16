@@ -1,6 +1,7 @@
 ﻿using Mapsui.Geometries;
 using Mapsui.Providers;
 using Mapsui.Styles;
+using Mapsui.UI;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -13,7 +14,7 @@ namespace Mapsui.VectorTiles
 {
     public class SymbolProvider : IProvider
     {
-        private readonly Map _map;
+        private readonly IMapControl _mapControl;
         private long _lastTime = DateTime.Now.Ticks;
         private ConcurrentBag<Symbol> _symbols;
 
@@ -23,11 +24,11 @@ namespace Mapsui.VectorTiles
 
         public BoundingBox Bounds { get; } = new BoundingBox(0, 0, 0, 0);
 
-        public SymbolProvider(Map map)
+        public SymbolProvider(IMapControl mapControl)
         {
-            _map = map;
+            _mapControl = mapControl;
 
-            _map.Viewport.ViewportChanged += ViewportChanged;
+            _mapControl.Viewport.ViewportChanged += ViewportChanged;
 
             _symbols = new ConcurrentBag<Symbol>();
         }
@@ -63,7 +64,7 @@ namespace Mapsui.VectorTiles
 
                     maxSymbols++;
 
-                    if (maxSymbols > 9)
+                    if (maxSymbols > 99)
                         break;
                 }
             }
@@ -73,7 +74,10 @@ namespace Mapsui.VectorTiles
 
         public void Add(Symbol symbol)
         {
-            _symbols.Add(symbol);
+            if (_symbols.Count == 0 || _symbols.FirstOrDefault(s => s.Feature.Id == symbol.Feature.Id) == null)
+                _symbols.Add(symbol);
+            else if (_symbols.Count != 0)
+                Logging.Logger.Log(Logging.LogLevel.Debug, $"Feature {symbol.Feature.Id} allready existing");
 
             SymbolsChanged();
         }

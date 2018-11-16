@@ -12,6 +12,8 @@ namespace Mapsui.UI
 
         Map Map { get; set; }
 
+        IReadOnlyViewport Viewport { get; }
+            
         event EventHandler ViewportInitialized;
 
         void RefreshGraphics();

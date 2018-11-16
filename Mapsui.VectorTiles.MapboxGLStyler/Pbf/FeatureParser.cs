@@ -121,7 +121,7 @@ namespace Mapsui.VectorTiles.MapboxGLFormat
             }
 
             // Save bounding box for later use
-            vtf.Bounds = vtf.Geometry.GetBoundingBox();
+            vtf.Bounds = vtf.Geometry.BoundingBox;
 
             // now add the tags
             vtf.Tags.Add(TagsParser.Parse(keys, values, feature.Tags));

@@ -26,60 +26,6 @@
     <None Remove="MbTiles\world.mbtiles" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="EmbeddedResources\cities.geojson" />
-    <EmbeddedResource Include="EmbeddedResources\cities.json" />
-    <EmbeddedResource Include="EmbeddedResources\congo.json" />
-    <EmbeddedResource Include="EmbeddedResources\countries-hires.json" />
-    <EmbeddedResource Include="EmbeddedResources\el-molar.mbtiles" />
-    <EmbeddedResource Include="EmbeddedResources\torrejon-de-ardoz.mbtiles">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="EmbeddedResources\world.mbtiles">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Images\arrow.png" />
-    <EmbeddedResource Include="Images\netherlands.jpg" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="AllSamples.cs" />
-    <Compile Include="Helpers\MbTilesHelper.cs" />
-    <Compile Include="Helpers\RandomPointHelper.cs" />
-    <Compile Include="Maps\BingSample.cs" />
-    <Compile Include="Maps\CenterOnLocationSample.cs" />
-    <Compile Include="Maps\KeepWithinExtentsSample.cs" />
-    <Compile Include="Maps\LabelsOnPathSample.cs" />
-    <Compile Include="Maps\LabelsSample.cs" />
-    <Compile Include="Maps\MbTilesOverlaySample.cs" />
-    <Compile Include="Maps\MbTilesSample.cs" />
-    <Compile Include="Maps\MutatingTriangleSample.cs" />
-    <Compile Include="Maps\OpacityStyleSample.cs" />
-    <Compile Include="Maps\ScaleBarSample.cs" />
-    <Compile Include="Maps\OsmSample.cs" />
-    <Compile Include="Maps\InfoLayersSample.cs" />
-    <Compile Include="Maps\PenStrokeCapSample.cs" />
-    <Compile Include="Maps\RasterizingLayerSample.cs" />
-    <Compile Include="Maps\EmptyMapSample.cs" />
-    <Compile Include="Maps\AtlasSample.cs" />
-    <Compile Include="Maps\SvgSample.cs" />
-    <Compile Include="Maps\WidgetSample.cs" />
-    <Compile Include="Maps\SymbolsSample.cs" />
-    <Compile Include="Maps\VariousSample.cs" />
-    <Compile Include="Maps\StackedLabelsSample.cs" />
-    <Compile Include="Maps\PolygonSample.cs" />
-    <Compile Include="Maps\AnimatedPointsSample.cs" />
-    <Compile Include="Maps\GeodanOfficesSample.cs" />
-    <Compile Include="Maps\ProjectionSample.cs" />
-    <Compile Include="Maps\TmsSample.cs" />
-    <Compile Include="Maps\WmscSample.cs" />
-    <Compile Include="Maps\TiledWmsSample.cs" />
-    <Compile Include="Maps\LineStringSample.cs" />
-    <Compile Include="Maps\PointsSample.cs" />
-    <Compile Include="Maps\SymbolsInWorldUnitsSample.cs" />
-    <Compile Include="PeriodicTask.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Maps\WmtsSample.cs" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\..\Mapsui.Geometries\Mapsui.Geometries.csproj">
       <Project>{EE55B62D-FFA2-4C24-A4AD-7A47ACE55CE5}</Project>
       <Name>Mapsui.Geometries</Name>
@@ -88,9 +34,6 @@
       <Project>{D74C052A-C07E-4B37-A898-134218ACA5C9}</Project>
       <Name>Mapsui</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Images\loc.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Images\Ghostscript_Tiger.png" />

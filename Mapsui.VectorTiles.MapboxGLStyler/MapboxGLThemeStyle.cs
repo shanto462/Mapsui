@@ -14,7 +14,7 @@ namespace Mapsui.VectorTiles.MapboxGLStyler
         private readonly StyleLayerConverter _converter;
         private readonly StyleLayer _styleLayer;
         private readonly Dictionary<string, Styles.Sprite> _sprites;
-        private readonly Viewport _viewport;
+        private readonly IReadOnlyViewport _viewport;
         private readonly SymbolProvider _symbolProvider;
 
         public double MinVisible { get; set; }
@@ -24,7 +24,7 @@ namespace Mapsui.VectorTiles.MapboxGLStyler
         public float Zoom { get; private set; }
         public int ZoomLevel { get; private set; }
 
-        public MapboxGLThemeStyle(StyleLayerConverter converter, StyleLayer styleLayer, Dictionary<string, Styles.Sprite> sprites, Viewport viewport, SymbolProvider symbolProvider)
+        public MapboxGLThemeStyle(StyleLayerConverter converter, StyleLayer styleLayer, Dictionary<string, Styles.Sprite> sprites, IReadOnlyViewport viewport, SymbolProvider symbolProvider)
         {
             _converter = converter;
             _styleLayer = styleLayer;

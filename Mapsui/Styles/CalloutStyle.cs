@@ -15,9 +15,27 @@ namespace Mapsui.Styles
 
     public class CalloutStyle : VectorStyle
     {
+        private ArrowAlignment _arrowAlignment = ArrowAlignment.Bottom;
+        private float _arrowWidth = 8f;
+        private float _arrowHeight = 8f;
+        private float _arrowPosition = 0.5f;
+        private float _rectRadius = 4f;
+        private float _padding = 3f;
+        private float _shadowWidth = 2f;
+
         public CalloutStyle()
         {
         }
+
+        /// <summary>
+        /// Storage for a prerendered path
+        /// </summary>
+        public object Path;
+
+        /// <summary>
+        /// Storage for the arrow center of callout
+        /// </summary>
+        public object Center;
 
         /// <summary>
         /// Offset position in pixels of Callout
@@ -37,22 +55,78 @@ namespace Mapsui.Styles
         /// <summary>
         /// Anchor position of Callout
         /// </summary>
-        public ArrowAlignment ArrowAlignment = ArrowAlignment.Bottom;
+        public ArrowAlignment ArrowAlignment 
+        { 
+            get
+            { 
+                return _arrowAlignment; 
+            }
+            set
+            {
+                if (value != _arrowAlignment)
+                {
+                    _arrowAlignment = value;
+                    Path = null;
+                }
+            }
+        }
 
         /// <summary>
         /// Width of opening of anchor of Callout
         /// </summary>
-        public float ArrowWidth = 8f;
+        public float ArrowWidth
+        {
+            get
+            {
+                return _arrowWidth;
+            }
+            set
+            {
+                if (value != _arrowWidth)
+                {
+                    _arrowWidth = value;
+                    Path = null;
+                }
+            }
+        }
 
         /// <summary>
         /// Height of anchor of Callout
         /// </summary>
-        public float ArrowHeight = 8f;
+        public float ArrowHeight
+        {
+            get
+            {
+                return _arrowHeight;
+            }
+            set
+            {
+                if (value != _arrowHeight)
+                {
+                    _arrowHeight = value;
+                    Path = null;
+                }
+            }
+        }
 
         /// <summary>
         /// Relative position of anchor of Callout on the side given by AnchorType
         /// </summary>
-        public float ArrowPosition = 0.5f;
+        public float ArrowPosition
+        {
+            get
+            {
+                return _arrowPosition;
+            }
+            set
+            {
+                if (value != _arrowPosition)
+                {
+                    _arrowPosition = value;
+                    Path = null;
+                }
+            }
+        }
 
         /// <summary>
         /// Color of stroke around Callout
@@ -72,17 +146,59 @@ namespace Mapsui.Styles
         /// <summary>
         /// Radius of rounded corners of Callout
         /// </summary>
-        public float RectRadius = 4f;
+        public float RectRadius
+        {
+            get
+            {
+                return _rectRadius;
+            }
+            set
+            {
+                if (value != _rectRadius)
+                {
+                    _rectRadius = value;
+                    Path = null;
+                }
+            }
+        }
 
         /// <summary>
         /// Padding around content of Callout
         /// </summary>
-        public float Padding = 3f;
+        public float Padding
+        {
+            get
+            {
+                return _padding;
+            }
+            set
+            {
+                if (value != _padding)
+                {
+                    _padding = value;
+                    Path = null;
+                }
+            }
+        }
 
         /// <summary>
         /// Width of shadow around Callout
         /// </summary>
-        public float ShadowWidth = 2f;
+        public float ShadowWidth
+        {
+            get
+            {
+                return _shadowWidth;
+            }
+            set
+            {
+                if (value != _shadowWidth)
+                {
+                    _shadowWidth = value;
+                    Path = null;
+                }
+            }
+        }
 
         /// <summary>
         /// Content of Callout

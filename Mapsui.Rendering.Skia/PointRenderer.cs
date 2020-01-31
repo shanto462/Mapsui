@@ -53,7 +53,18 @@ namespace Mapsui.Rendering.Skia
             var fill = new SKPaint { IsAntialias = true, Style = SKPaintStyle.Fill, Color = style.BackgroundColor.ToSkia(opacity) };
             var stroke = new SKPaint { IsAntialias = true, Style = SKPaintStyle.Stroke, Color = style.Color.ToSkia(opacity), StrokeWidth = style.StrokeWidth };
 
-            var (path, center) = CreateCalloutPath(style, symbolCache);
+            SKPath path;
+            SKPoint center;
+
+            if (style.Path == null)
+            {
+                (path, center) = CreateCalloutPath(style, symbolCache);
+                style.Path = path;
+                style.Center = center;
+            }
+
+            path = (SKPath)style.Path;
+            center = (SKPoint)style.Center;
 
             var rotation = style.Rotation;
             if (style.RotateWithMap) rotation += mapRotation;
@@ -79,15 +90,6 @@ namespace Mapsui.Rendering.Skia
                 var offsetY = -(symbolCache.GetOrCreate(style.Content).Height * 0.5f + style.ShadowWidth + style.Padding);
                 DrawBitmap(canvas, symbolCache.GetOrCreate(style.Content), new Point(0, 0), new Point(offsetX, offsetY), symbolCache, opacity, rotation, 1.0);
             }
-
-            // Draw close button
-            //if (IsCloseVisible)
-            //{
-            //    var paint = new SKPaint { IsAntialias = true, Style = SKPaintStyle.Stroke, Color = SKColors.DarkGray, StrokeWidth = 2 };
-            //    var pos = _close.Bounds.Offset(_grid.Bounds.Left, _grid.Bounds.Top).Inflate(-4, -4);
-            //    canvas.DrawLine((float)pos.Left, (float)pos.Top, (float)pos.Right, (float)pos.Bottom, paint);
-            //    canvas.DrawLine((float)pos.Left, (float)pos.Bottom, (float)pos.Right, (float)pos.Top, paint);
-            //}
 
             canvas.Restore();
         }

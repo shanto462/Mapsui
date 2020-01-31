@@ -61,10 +61,16 @@ namespace Mapsui.Rendering.Skia
             canvas.Save();
             canvas.Translate((float)destination.X - center.X + (float)style.Offset.X, (float)destination.Y - center.Y - (float)style.Offset.Y);
 
+            if (rotation != 0)
+                canvas.RotateDegrees(rotation, center.X, center.Y);
+
             //canvas.Clear(SKColors.Transparent);
             canvas.DrawPath(path, shadow);
             canvas.DrawPath(path, fill);
             canvas.DrawPath(path, stroke);
+
+            if (rotation != 0)
+                canvas.RotateDegrees(-rotation, 0, 0);
 
             // Draw content
             if (style.Content >= 0)

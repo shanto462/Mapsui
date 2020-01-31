@@ -85,10 +85,9 @@ namespace Mapsui.Samples.Common.Maps
                     MemoryStream memStream = new MemoryStream();
                     SKManagedWStream wstream = new SKManagedWStream(memStream);
                     SKPixmap.Encode(wstream, bitmap, SKEncodedImageFormat.Png, 100);
-                    //byte[] data = memStream.ToArray();
                     bitmapId = BitmapRegistry.Instance.Register(memStream);
                 }
-                var calloutStyle = new CalloutStyle() { Content = bitmapId, ArrowPosition = Random.Next(1, 9) * 0.1f, Rotation = 30 };
+                var calloutStyle = new CalloutStyle() { Content = bitmapId, ArrowPosition = Random.Next(1, 9) * 0.1f, RotateWithMap = true };
                 switch ((int)Random.Next(0,4))
                 {
                     case 0:

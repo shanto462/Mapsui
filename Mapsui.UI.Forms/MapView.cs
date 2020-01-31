@@ -943,7 +943,11 @@ namespace Mapsui.UI.Forms
                 }
 
                 // A feature is clicked
-                HandlerInfo(sender, new MapInfoEventArgs { MapInfo = mapInfo, Handled = e.Handled, NumTaps = e.NumOfTaps });
+                var mapInfoEventArgs = new MapInfoEventArgs { MapInfo = mapInfo, Handled = e.Handled, NumTaps = e.NumOfTaps };
+
+                HandlerInfo(sender, mapInfoEventArgs);
+
+                e.Handled = mapInfoEventArgs.Handled;
             }
         }
 

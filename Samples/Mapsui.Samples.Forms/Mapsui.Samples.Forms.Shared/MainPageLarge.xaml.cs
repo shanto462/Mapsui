@@ -1,5 +1,6 @@
 ﻿using Mapsui.Samples.Common;
 using Mapsui.Samples.Common.ExtensionMethods;
+using Mapsui.Styles;
 using Mapsui.UI.Forms;
 using Plugin.Geolocator;
 using Plugin.Geolocator.Abstractions;
@@ -57,7 +58,20 @@ namespace Mapsui.Samples.Forms
         private void MapView_Info(object sender, UI.MapInfoEventArgs e)
         {
             if (e?.MapInfo?.Feature != null)
+            {
                 featureInfo.Text = $"Click Info:{Environment.NewLine}{e.MapInfo.Feature.ToDisplayText()}";
+
+                foreach (var style in e.MapInfo.Feature.Styles)
+                {
+                    if (style is CalloutStyle)
+                    {
+                        style.Enabled = !style.Enabled;
+                        e.Handled = true;
+                    }
+                }
+
+                mapView.Refresh();
+            }
         }
 
         private void FillListWithSamples()

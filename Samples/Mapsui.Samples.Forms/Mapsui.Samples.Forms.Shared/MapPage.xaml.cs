@@ -9,6 +9,7 @@ using Plugin.Geolocator;
 using Plugin.Geolocator.Abstractions;
 using Mapsui.UI;
 using System.Threading.Tasks;
+using Mapsui.Styles;
 
 namespace Mapsui.Samples.Forms
 {
@@ -35,6 +36,8 @@ namespace Mapsui.Samples.Forms
 
             mapView.MyLocationLayer.UpdateMyLocation(new UI.Forms.Position());
 
+            mapView.Info += MapView_Info;
+
             Task.Run(() => StartGPS());
 
             setup(mapView);
@@ -45,6 +48,23 @@ namespace Mapsui.Samples.Forms
         protected override void OnAppearing()
         {
             mapView.Refresh();
+        }
+
+        private void MapView_Info(object sender, UI.MapInfoEventArgs e)
+        {
+            if (e?.MapInfo?.Feature != null)
+            {
+                foreach (var style in e.MapInfo.Feature.Styles)
+                {
+                    if (style is CalloutStyle)
+                    {
+                        style.Enabled = !style.Enabled;
+                        e.Handled = true;
+                    }
+                }
+
+                mapView.Refresh();
+            }
         }
 
         private void OnMapClicked(object sender, MapClickedEventArgs e)

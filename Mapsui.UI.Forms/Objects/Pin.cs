@@ -226,12 +226,12 @@ namespace Mapsui.UI.Forms
                     _callout = _mapView.CreateCallout(Position);
                     if (string.IsNullOrWhiteSpace(Address))
                     {
-                        _callout.Type = CalloutType.Single;
+                        _callout.Type = Objects.CalloutType.Single;
                         _callout.Title = Label;
                     }
                     else
                     {
-                        _callout.Type = CalloutType.Detail;
+                        _callout.Type = Objects.CalloutType.Detail;
                         _callout.Title = Label;
                         _callout.Subtitle = Address;
                     }

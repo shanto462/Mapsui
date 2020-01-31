@@ -88,7 +88,7 @@ namespace Mapsui.Samples.Common.Maps
                     //byte[] data = memStream.ToArray();
                     bitmapId = BitmapRegistry.Instance.Register(memStream);
                 }
-                var calloutStyle = new CalloutStyle() { Content = bitmapId, ArrowPosition = Random.Next(1, 9) * 0.1f };
+                var calloutStyle = new CalloutStyle() { Content = bitmapId, ArrowPosition = Random.Next(1, 9) * 0.1f, Rotation = 30 };
                 switch ((int)Random.Next(0,4))
                 {
                     case 0:

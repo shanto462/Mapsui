@@ -86,8 +86,8 @@ namespace Mapsui.Rendering.Skia
             // Draw content
             if (style.Content >= 0)
             {
-                var offsetX = symbolCache.GetOrCreate(style.Content).Width * 0.5f + style.ShadowWidth + style.Padding;
-                var offsetY = -(symbolCache.GetOrCreate(style.Content).Height * 0.5f + style.ShadowWidth + style.Padding);
+                var offsetX = symbolCache.GetOrCreate(style.Content).Width * 0.5f + style.ShadowWidth + (float)style.Padding.MinX;
+                var offsetY = -(symbolCache.GetOrCreate(style.Content).Height * 0.5f + style.ShadowWidth + (float)style.Padding.MinY);
                 DrawBitmap(canvas, symbolCache.GetOrCreate(style.Content), new Point(0, 0), new Point(offsetX, offsetY), symbolCache, opacity, rotation, 1.0);
             }
 
@@ -270,9 +270,9 @@ namespace Mapsui.Rendering.Skia
         /// </summary>
         private static (SKPath, SKPoint) CreateCalloutPath(CalloutStyle style, SymbolCache symbolCache)
         {
-            var width = (float)symbolCache.GetSize(style.Content).Width + style.Padding * 2;
+            var width = (style.Content >= 0 ? (float)symbolCache.GetSize(style.Content).Width : style.DefaultWidth) + (float)style.Padding.MinX + (float)style.Padding.MaxX;
             //width += style.ArrowAlignment == ArrowAlignment.Left || style.ArrowAlignment == ArrowAlignment.Right ? style.ArrowHeight : 0;
-            var height = (float)symbolCache.GetSize(style.Content).Height + style.Padding * 2;
+            var height = (style.Content >= 0 ? (float)symbolCache.GetSize(style.Content).Height : style.DefaultHeight) + (float)style.Padding.MinY + (float)style.Padding.MaxY;
             //height += style.ArrowAlignment == ArrowAlignment.Top || style.ArrowAlignment == ArrowAlignment.Bottom ? style.ArrowHeight : 0;
             var halfWidth = width * style.ArrowPosition;
             var halfHeight = height * style.ArrowPosition;

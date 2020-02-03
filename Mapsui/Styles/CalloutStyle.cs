@@ -20,12 +20,22 @@ namespace Mapsui.Styles
         private float _arrowHeight = 8f;
         private float _arrowPosition = 0.5f;
         private float _rectRadius = 4f;
-        private float _padding = 3f;
         private float _shadowWidth = 2f;
+        private BoundingBox _padding = new BoundingBox(3f, 3f, 3f, 3f);
 
         public CalloutStyle()
         {
         }
+
+        /// <summary>
+        /// Default width of callout, if it hasn't content
+        /// </summary>
+        public float DefaultWidth = 100.0f;
+
+        /// <summary>
+        /// Default height of callout, if it hasn't content
+        /// </summary>
+        public float DefaultHeight = 30.0f;
 
         /// <summary>
         /// Storage for a prerendered path
@@ -165,7 +175,7 @@ namespace Mapsui.Styles
         /// <summary>
         /// Padding around content of Callout
         /// </summary>
-        public float Padding
+        public BoundingBox Padding
         {
             get
             {
@@ -206,6 +216,6 @@ namespace Mapsui.Styles
         /// <remarks>
         /// Is a BitmapId of a save image
         /// </remarks>
-        public int Content;
+        public int Content = -1;
     }
 }

@@ -507,86 +507,6 @@ namespace Mapsui.UI.Forms
 
         #endregion
 
-        #region Callouts
-
-        private Callout _callout;
-
-        /// <summary>
-        /// Creates a callout at the given position
-        /// </summary>
-        /// <returns>The callout</returns>
-        /// <param name="position">Position of callout</param>
-        public Callout CreateCallout(Position position)
-        {
-            // In Forms.UWP, the Callout needs to be created on the UI Thread
-            Device.BeginInvokeOnMainThread(() =>
-            {
-                _callout = new Callout(_mapControl)
-                {
-                    Anchor = position
-                };
-            });
-
-            // My interpretation (PDD): This while keeps looping until the asynchronous call
-            // above has created a callout.
-            // An alternative might be to avoid CreateCallout from a non-ui thread by throwing
-            // early.
-            while (_callout == null) ;
-
-            var result = _callout;
-            _callout = null;
-
-            return result;
-        }
-
-        /// <summary>
-        /// Shows given callout
-        /// </summary>
-        /// <param name="callout">Callout to show</param>
-        public void ShowCallout(Callout callout)
-        {
-            if (callout == null)
-                return;
-
-            // Set absolute layout constrains
-            AbsoluteLayout.SetLayoutFlags(callout, AbsoluteLayoutFlags.None);
-
-            // Add it to MapView
-            if (!((AbsoluteLayout)Content).Children.Contains(callout))
-                Device.BeginInvokeOnMainThread(() => ((AbsoluteLayout)Content).Children.Add(callout));
-
-            // Add it to list of active Callouts
-            _callouts.Add(callout);
-
-            // When Callout is closed by close button
-            callout.CalloutClosed += (s, e) => HideCallout((Callout)s);
-
-            // Inform Callout
-            callout.Show();
-        }
-
-        /// <summary>
-        /// Hides given callout
-        /// </summary>
-        /// <param name="callout">Callout to hide</param>
-        public void HideCallout(Callout callout)
-        {
-            if (callout == null)
-                return;
-
-            // Inform Callout
-            callout.Hide();
-
-            // Remove it from list of active Callouts
-            _callouts.Remove(callout);
-
-            // Remove it from MapView
-            if (((AbsoluteLayout)Content).Children.Contains(callout))
-                Device.BeginInvokeOnMainThread(() => ((AbsoluteLayout)Content).Children.Remove(callout));
-        }
-
-        #endregion
-
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
@@ -595,6 +515,22 @@ namespace Mapsui.UI.Forms
         public IEnumerator<Pin> GetEnumerator()
         {
             return _pins.GetEnumerator();
+        }
+
+        /// <summary>
+        /// Hide all visible callouts
+        /// </summary>
+        public void HideCallouts()
+        {
+            var pins = _pins.ToList();
+
+            foreach(var pin in pins)
+            {
+                if (pin.Callout.IsVisible)
+                {
+                    pin.Callout.IsVisible = false;
+                }
+            }
         }
 
         protected override void OnPropertyChanged([CallerMemberName] string propertyName = "")
@@ -702,26 +638,8 @@ namespace Mapsui.UI.Forms
 
                 // Update rotationButton
                 _mapNorthingButton.Rotation = _mapControl.Viewport.Rotation;
-
-                // Check all callout positions
-                var list = _callouts.ToList();
-                var pins = _pins.ToList();
-
-                // First check all Callouts, that belong to a pin
-                foreach (var pin in pins)
-                {
-                    if (pin.Callout != null)
-                    {
-                        pin.UpdateCalloutPosition();
-                        list.Remove(pin.Callout);
-                    }
-                }
-
-                // Now check the rest, Callouts not belonging to a pin
-                foreach (var c in list)
-                    c.UpdateScreenPosition();
-
             }
+
             if (e.PropertyName.Equals(nameof(Viewport.Center)))
             {
                 if (MyLocationFollow && !_mapControl.Viewport.Center.Equals(_mapMyLocationLayer.MyLocation.ToMapsui()))
@@ -760,9 +678,6 @@ namespace Mapsui.UI.Forms
                     // Remove old pins from layer
                     if (item is Pin pin)
                     {
-                        HideCallout(pin.Callout);
-                        pin.Callout = null;
-
                         pin.PropertyChanged -= HandlerPinPropertyChanged;
 
                         if (SelectedPin != null && SelectedPin.Equals(pin))
@@ -896,24 +811,7 @@ namespace Mapsui.UI.Forms
         private void HandlerTap(object sender, TappedEventArgs e)
         {
             // Close all closable Callouts
-            var list = _callouts.ToList();
             var pins = _pins.ToList();
-
-            // First check all Callouts, that belong to a pin
-            foreach (var pin in pins)
-            {
-                if (pin.Callout != null)
-                {
-                    if (pin.Callout.IsClosableByClick)
-                        pin.IsCalloutVisible = false;
-                    list.Remove(pin.Callout);
-                }
-            }
-
-            // Now check the rest, Callouts not belonging to a pin
-            foreach (var c in list)
-                if (c.IsClosableByClick)
-                    HideCallout(c);
 
             e.Handled = false;
 

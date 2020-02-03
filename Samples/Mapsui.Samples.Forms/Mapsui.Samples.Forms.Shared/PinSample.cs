@@ -54,17 +54,31 @@ namespace Mapsui.Samples.Forms
                         Address = e.Point.ToString(),
                         Position = e.Point,
                         Type = PinType.Pin,
-                        Color = new Color(rnd.Next(0, 255) / 255.0, rnd.Next(0, 255) / 255.0, rnd.Next(0, 255) / 255.0),
+                        Color = new Xamarin.Forms.Color(rnd.Next(0, 256) / 256.0, rnd.Next(0, 256) / 256.0, rnd.Next(0, 256) / 256.0),
                         Transparency = 0.5f,
                         Scale = rnd.Next(50, 130) / 100f,
                     };
-                    pin.CalloutAnchor = new Point(0, pin.Height * pin.Scale);
-                    pin.Callout.RectRadius = rnd.Next(0, 20);
+                    pin.Callout.Anchor = new Point(0, pin.Height * pin.Scale);
+                    pin.Callout.RectRadius = rnd.Next(0, 30);
                     pin.Callout.ArrowHeight = rnd.Next(0, 20);
                     pin.Callout.ArrowWidth = rnd.Next(0, 20);
                     pin.Callout.ArrowAlignment = (ArrowAlignment)rnd.Next(0, 4);
                     pin.Callout.ArrowPosition = rnd.Next(0, 100) / 100;
-                    pin.Callout.SubtitleLabel.LineBreakMode = LineBreakMode.NoWrap;
+                    pin.Callout.BackgroundColor = Color.White;
+                    pin.Callout.Color = pin.Color;
+                    if (rnd.Next(0, 3) < 2)
+                    {
+                        pin.Callout.Type = CalloutType.Detail;
+                        pin.Callout.TitleFontSize = rnd.Next(15, 30);
+                        pin.Callout.SubtitleFontSize = pin.Callout.TitleFontSize - 5;
+                        pin.Callout.TitleFontColor = new Xamarin.Forms.Color(rnd.Next(0, 256) / 256.0, rnd.Next(0, 256) / 256.0, rnd.Next(0, 256) / 256.0);
+                        pin.Callout.SubtitleFontColor = pin.Color;
+                    }
+                    else
+                    {
+                        pin.Callout.Type = CalloutType.Detail;
+                        pin.Callout.Content = 1;
+                    }
                     mapView.Pins.Add(pin);
                     break;
                 case 2:

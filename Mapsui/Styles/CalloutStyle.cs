@@ -53,6 +53,11 @@ namespace Mapsui.Styles
         public Point Offset = new Point(0, 0);
 
         /// <summary>
+        /// BoundingBox relative to offset point
+        /// </summary>
+        public BoundingBox BoundingBox = new BoundingBox();
+
+        /// <summary>
         /// Gets or sets the rotation of the Callout in degrees (clockwise is positive)
         /// </summary>
         public float Rotation { get; set; }

@@ -59,7 +59,6 @@ namespace Mapsui.UI.Objects
     public class Callout : BindableObject, IFeatureProvider
     {
         private Pin _pin;
-        private Feature _feature;
         private TextBlock _textBlock;
         private bool _updating = false;
 
@@ -92,7 +91,7 @@ namespace Mapsui.UI.Objects
         public static readonly BindableProperty RectRadiusProperty = BindableProperty.Create(nameof(RectRadius), typeof(float), typeof(MapView), default(float));
         public static readonly BindableProperty PaddingProperty = BindableProperty.Create(nameof(Padding), typeof(Thickness), typeof(MapView), new Thickness(6));
         // public static readonly BindableProperty IsCloseVisibleProperty = BindableProperty.Create(nameof(IsCloseVisible), typeof(bool), typeof(MapView), true);
-        // public static readonly BindableProperty IsClosableByClickProperty = BindableProperty.Create(nameof(IsClosableByClick), typeof(bool), typeof(MapView), true);
+        public static readonly BindableProperty IsClosableByClickProperty = BindableProperty.Create(nameof(IsClosableByClick), typeof(bool), typeof(MapView), true);
         public static readonly BindableProperty ContentProperty = BindableProperty.Create(nameof(Content), typeof(int), typeof(MapView), -1);
         public static readonly BindableProperty TitleProperty = BindableProperty.Create(nameof(Title), typeof(string), typeof(MapView), default(string));
         public static readonly BindableProperty TitleFontNameProperty = BindableProperty.Create(nameof(TitleFontName), typeof(string), typeof(MapView), DefaultTitleFontName);
@@ -115,8 +114,8 @@ namespace Mapsui.UI.Objects
             }
 
             _pin = pin;
-            _feature = (Feature)_pin.Feature.Copy();
-            _feature.Styles.Clear();
+            Feature = (Feature)_pin.Feature.Copy();
+            Feature.Styles.Clear();
         }
 
         /// <summary>
@@ -382,10 +381,7 @@ namespace Mapsui.UI.Objects
         /// <summary>
         /// Feature, which belongs to callout. Should be the same as for the pin.
         /// </summary>
-        public Feature Feature
-        { 
-            get => _feature; 
-        }
+        public Feature Feature { get; }
 
         protected override void OnPropertyChanged([CallerMemberName] string propertyName = "")
         {
@@ -507,12 +503,12 @@ namespace Mapsui.UI.Objects
         /// </summary>
         private void UpdateCalloutStyle()
         {
-            CalloutStyle style = (CalloutStyle)_feature.Styles.Where((s) => s is CalloutStyle).FirstOrDefault();
+            CalloutStyle style = (CalloutStyle)Feature.Styles.Where((s) => s is CalloutStyle).FirstOrDefault();
 
             if (style == null)
             {
                 style = new CalloutStyle();
-                _feature.Styles.Add(style);
+                Feature.Styles.Add(style);
             }
 
             style.ArrowAlignment = (Mapsui.Styles.ArrowAlignment)ArrowAlignment;

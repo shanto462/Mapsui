@@ -61,6 +61,10 @@ namespace Mapsui.Rendering.Skia
                 (path, center) = CreateCalloutPath(style, symbolCache);
                 style.Path = path;
                 style.Center = center;
+                style.BoundingBox = new BoundingBox(path.Bounds.Left + style.Offset.X - center.X, 
+                    path.Bounds.Top + style.Offset.Y - center.Y, 
+                    path.Bounds.Right + style.Offset.X + center.X, 
+                    path.Bounds.Bottom + style.Offset.Y + center.Y);
             }
 
             path = (SKPath)style.Path;

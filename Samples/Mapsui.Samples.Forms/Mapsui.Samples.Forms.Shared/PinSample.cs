@@ -80,6 +80,7 @@ namespace Mapsui.Samples.Forms
                         pin.Callout.Content = 1;
                     }
                     mapView.Pins.Add(pin);
+                    pin.ShowCallout();
                     break;
                 case 2:
                     foreach (var r in assembly.GetManifestResourceNames())
@@ -118,6 +119,7 @@ namespace Mapsui.Samples.Forms
             mapControl.Map = OsmSample.CreateMap();
 
             ((MapView)mapControl).UseDoubleTap = true;
+            //((MapView)mapControl).UniqueCallout = true;
         }
     }
 }

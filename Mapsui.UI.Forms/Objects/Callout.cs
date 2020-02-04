@@ -1,9 +1,9 @@
 ﻿using Mapsui.Geometries;
+using Mapsui.Providers;
 using Mapsui.Styles;
 using Mapsui.UI.Forms;
 using Mapsui.UI.Forms.Extensions;
 using SkiaSharp;
-using SkiaSharp.Views.Forms;
 using System;
 using System.IO;
 using System.Linq;
@@ -56,9 +56,10 @@ namespace Mapsui.UI.Objects
     }
 
 
-    public class Callout : BindableObject
+    public class Callout : BindableObject, IFeatureProvider
     {
         private Pin _pin;
+        private Feature _feature;
         private TextBlock _textBlock;
         private bool _updating = false;
 
@@ -90,9 +91,8 @@ namespace Mapsui.UI.Objects
         public static readonly BindableProperty RotateWithMapProperty = BindableProperty.Create(nameof(RotateWithMap), typeof(bool), typeof(MapView), false);
         public static readonly BindableProperty RectRadiusProperty = BindableProperty.Create(nameof(RectRadius), typeof(float), typeof(MapView), default(float));
         public static readonly BindableProperty PaddingProperty = BindableProperty.Create(nameof(Padding), typeof(Thickness), typeof(MapView), new Thickness(6));
-        public static readonly BindableProperty IsVisibleProperty = BindableProperty.Create(nameof(IsVisible), typeof(bool), typeof(MapView), false);
         // public static readonly BindableProperty IsCloseVisibleProperty = BindableProperty.Create(nameof(IsCloseVisible), typeof(bool), typeof(MapView), true);
-        public static readonly BindableProperty IsClosableByClickProperty = BindableProperty.Create(nameof(IsClosableByClick), typeof(bool), typeof(MapView), true);
+        // public static readonly BindableProperty IsClosableByClickProperty = BindableProperty.Create(nameof(IsClosableByClick), typeof(bool), typeof(MapView), true);
         public static readonly BindableProperty ContentProperty = BindableProperty.Create(nameof(Content), typeof(int), typeof(MapView), -1);
         public static readonly BindableProperty TitleProperty = BindableProperty.Create(nameof(Title), typeof(string), typeof(MapView), default(string));
         public static readonly BindableProperty TitleFontNameProperty = BindableProperty.Create(nameof(TitleFontName), typeof(string), typeof(MapView), DefaultTitleFontName);
@@ -115,6 +115,8 @@ namespace Mapsui.UI.Objects
             }
 
             _pin = pin;
+            _feature = (Feature)_pin.Feature.Copy();
+            _feature.Styles.Clear();
         }
 
         /// <summary>
@@ -248,8 +250,7 @@ namespace Mapsui.UI.Objects
         /// </summary>
         public bool IsVisible
         {
-            get { return (bool)GetValue(IsVisibleProperty); }
-            set { SetValue(IsVisibleProperty, value); }
+            get { return _pin.IsCalloutVisible(); }
         }
 
         /// <summary>
@@ -378,26 +379,24 @@ namespace Mapsui.UI.Objects
             set { SetValue(SubtitleTextAlignmentProperty, value); }
         }
 
-        internal void Show()
-        {
-            IsVisible = true;
-        }
-
-        internal void Hide()
-        {
-            IsVisible = false;
+        /// <summary>
+        /// Feature, which belongs to callout. Should be the same as for the pin.
+        /// </summary>
+        public Feature Feature
+        { 
+            get => _feature; 
         }
 
         protected override void OnPropertyChanged([CallerMemberName] string propertyName = "")
         {
-            Device.BeginInvokeOnMainThread(() => base.OnPropertyChanged(propertyName));
+            base.OnPropertyChanged(propertyName);
 
             if (!_updating && Type != CalloutType.Custom && propertyName.Equals(nameof(Content)))
             {
                 Type = CalloutType.Custom;
             }
 
-            if (!_updating && (propertyName.Equals(nameof(Title))
+            if (!_updating && IsVisible && (propertyName.Equals(nameof(Title))
                 || propertyName.Equals(nameof(Subtitle))
                 || propertyName.Equals(nameof(Content))
                 || propertyName.Equals(nameof(Type))
@@ -416,7 +415,7 @@ namespace Mapsui.UI.Objects
                 UpdateContent();
                 UpdateCalloutStyle();
             }
-            else if (propertyName.Equals(nameof(ArrowAlignment))
+            else if (IsVisible && propertyName.Equals(nameof(ArrowAlignment))
                 || propertyName.Equals(nameof(ArrowWidth))
                 || propertyName.Equals(nameof(ArrowHeight))
                 || propertyName.Equals(nameof(ArrowPosition))
@@ -429,7 +428,7 @@ namespace Mapsui.UI.Objects
             {
                 UpdateCalloutStyle();
             }
-            else if (!_updating)
+            else if (!_updating && IsVisible)
             {
                 throw new Exception("Unknown property name");
             }
@@ -508,19 +507,12 @@ namespace Mapsui.UI.Objects
         /// </summary>
         private void UpdateCalloutStyle()
         {
-            CalloutStyle style = (CalloutStyle)_pin.Feature.Styles.Where((s) => s is CalloutStyle).FirstOrDefault();
+            CalloutStyle style = (CalloutStyle)_feature.Styles.Where((s) => s is CalloutStyle).FirstOrDefault();
 
             if (style == null)
             {
                 style = new CalloutStyle();
-                _pin.Feature.Styles.Add(style);
-            }
-
-            if (!IsVisible)
-            {
-                style.Enabled = false;
-                _pin.MapView.Refresh();
-                return;
+                _feature.Styles.Add(style);
             }
 
             style.ArrowAlignment = (Mapsui.Styles.ArrowAlignment)ArrowAlignment;
@@ -528,7 +520,6 @@ namespace Mapsui.UI.Objects
             style.ArrowPosition = ArrowPosition;
             style.BackgroundColor = BackgroundColor.ToMapsui(); ;
             style.Color = Color.ToMapsui();
-            style.Enabled = IsVisible;
             style.Offset = new Geometries.Point(Anchor.X, Anchor.Y);
             style.Padding = new BoundingBox(Padding.Left, Padding.Top, Padding.Right, Padding.Bottom);
             style.RectRadius = RectRadius;
@@ -557,6 +548,15 @@ namespace Mapsui.UI.Objects
             }
 
             _pin.MapView.Refresh();
+        }
+
+        /// <summary>
+        /// Update content and style of callout before display it the first time
+        /// </summary>
+        internal void Update()
+        {
+            UpdateContent();
+            UpdateCalloutStyle();
         }
 
         /// <summary>

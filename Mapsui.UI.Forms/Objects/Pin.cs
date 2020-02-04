@@ -238,6 +238,32 @@ namespace Mapsui.UI.Forms
         }
 
         /// <summary>
+        /// Show corresponding callout
+        /// </summary>
+        public void ShowCallout()
+        {
+            _callout.Update();
+            _mapView.AddCallout(_callout);
+        }
+
+        /// <summary>
+        /// Hide corresponding callout
+        /// </summary>
+        public void HideCallout()
+        {
+            _mapView.RemoveCallout(_callout);
+        }
+
+        /// <summary>
+        /// Check visibility for corresponding callout
+        /// </summary>
+        /// <returns>True, if callout is visible on map</returns>
+        public bool IsCalloutVisible()
+        {
+            return _mapView.IsCalloutVisible(_callout);
+        }
+
+        /// <summary>
         /// Determines whether the specified <see cref="object"/> is equal to the current <see cref="T:Mapsui.UI.Forms.Pin"/>.
         /// </summary>
         /// <param name="obj">The <see cref="object"/> to compare with the current <see cref="T:Mapsui.UI.Forms.Pin"/>.</param>
@@ -289,6 +315,7 @@ namespace Mapsui.UI.Forms
             {
                 case nameof(Position):
                     _feature.Geometry = Position.ToMapsui();
+                    _callout.Feature.Geometry = _feature.Geometry;
                     break;
                 case nameof(Label):
                     _feature["Label"] = Label;

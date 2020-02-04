@@ -123,7 +123,10 @@ namespace Mapsui.Samples.Forms
                     e.Pin.IsVisible = false;
                 }
                 if (e.NumOfTaps == 1)
-                    e.Pin.Callout.IsVisible = !e.Pin.Callout.IsVisible;
+                    if (e.Pin.Callout.IsVisible)
+                        e.Pin.HideCallout();
+                    else
+                        e.Pin.ShowCallout();
             }
 
             e.Handled = true;

@@ -23,8 +23,10 @@ namespace Mapsui.UI.Forms
         internal MapControl _mapControl;
 
         private readonly MyLocationLayer _mapMyLocationLayer;
+        private const string CalloutLayerName = "Callouts";
         private const string PinLayerName = "Pins";
         private const string DrawableLayerName = "Drawables";
+        private readonly MemoryLayer _mapCalloutLayer;
         private readonly MemoryLayer _mapPinLayer;
         private readonly MemoryLayer _mapDrawableLayer;
         private readonly StackLayout _mapButtons;
@@ -53,6 +55,7 @@ namespace Mapsui.UI.Forms
 
             _mapControl = new MapControl { UseDoubleTap = false };
             _mapMyLocationLayer = new MyLocationLayer(this) { Enabled = true };
+            _mapCalloutLayer = new MemoryLayer() { Name = CalloutLayerName, IsMapInfoLayer = true };
             _mapPinLayer = new MemoryLayer() { Name = PinLayerName, IsMapInfoLayer = true };
             _mapDrawableLayer = new MemoryLayer() { Name = DrawableLayerName, IsMapInfoLayer = true };
 
@@ -155,6 +158,9 @@ namespace Mapsui.UI.Forms
             _pins.CollectionChanged += HandlerPinsOnCollectionChanged;
             _drawable.CollectionChanged += HandlerDrawablesOnCollectionChanged;
 
+            _mapCalloutLayer.DataSource = new ObservableCollectionProvider<Callout>(_callouts);
+            _mapCalloutLayer.Style = null;  // We don't want a global style for this layer
+
             _mapPinLayer.DataSource = new ObservableCollectionProvider<Pin>(_pins);
             _mapPinLayer.Style = null;  // We don't want a global style for this layer
 
@@ -245,6 +251,7 @@ namespace Mapsui.UI.Forms
         #region Bindings
 
         public static readonly BindableProperty SelectedPinProperty = BindableProperty.Create(nameof(SelectedPin), typeof(Pin), typeof(MapView), default(Pin), defaultBindingMode: BindingMode.TwoWay);
+        public static readonly BindableProperty UniqueCalloutProperty = BindableProperty.Create(nameof(UniqueCallout), typeof(bool), typeof(MapView), false, defaultBindingMode: BindingMode.TwoWay);
         public static readonly BindableProperty MyLocationEnabledProperty = BindableProperty.Create(nameof(MyLocationEnabled), typeof(bool), typeof(MapView), false, defaultBindingMode: BindingMode.TwoWay);
         public static readonly BindableProperty MyLocationFollowProperty = BindableProperty.Create(nameof(MyLocationFollow), typeof(bool), typeof(MapView), false, defaultBindingMode: BindingMode.TwoWay);
         public static readonly BindableProperty UnSnapRotationDegreesProperty = BindableProperty.Create(nameof(UnSnapRotationDegreesProperty), typeof(double), typeof(MapView), default(double));
@@ -324,6 +331,15 @@ namespace Mapsui.UI.Forms
         {
             get { return (Pin)GetValue(SelectedPinProperty); }
             set { SetValue(SelectedPinProperty, value); }
+        }
+
+        /// <summary>
+        /// Single or multiple callouts possible
+        /// </summary>
+        public bool UniqueCallout
+        {
+            get { return (bool)GetValue(UniqueCalloutProperty); }
+            set { SetValue(UniqueCalloutProperty, value); }
         }
 
         /// <summary>
@@ -507,6 +523,42 @@ namespace Mapsui.UI.Forms
 
         #endregion
 
+        internal void AddCallout(Callout callout)
+        {
+            if (!_callouts.Contains(callout))
+            {
+                if (UniqueCallout)
+                    HideCallouts();
+
+                _callouts.Add(callout);
+
+                Refresh();
+            }
+        }
+
+        internal void RemoveCallout(Callout callout)
+        {
+            if (_callouts.Contains(callout))
+            {
+                _callouts.Remove(callout);
+
+                Refresh();
+            }
+        }
+
+        internal bool IsCalloutVisible(Callout callout)
+        {
+            return _callouts.Contains(callout);
+        }
+
+        /// <summary>
+        /// Hide all visible callouts
+        /// </summary>
+        public void HideCallouts()
+        {
+            _callouts.Clear();
+        }
+
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
@@ -515,22 +567,6 @@ namespace Mapsui.UI.Forms
         public IEnumerator<Pin> GetEnumerator()
         {
             return _pins.GetEnumerator();
-        }
-
-        /// <summary>
-        /// Hide all visible callouts
-        /// </summary>
-        public void HideCallouts()
-        {
-            var pins = _pins.ToList();
-
-            foreach(var pin in pins)
-            {
-                if (pin.Callout.IsVisible)
-                {
-                    pin.Callout.IsVisible = false;
-                }
-            }
         }
 
         protected override void OnPropertyChanged([CallerMemberName] string propertyName = "")
@@ -656,7 +692,7 @@ namespace Mapsui.UI.Forms
 
         private void HandlerLayerChanged(ILayer layer)
         {
-            if (layer == _mapMyLocationLayer || layer == _mapDrawableLayer || layer == _mapPinLayer)
+            if (layer == _mapMyLocationLayer || layer == _mapDrawableLayer || layer == _mapPinLayer || layer == _mapCalloutLayer)
                 return;
 
             // Remove MapView layers
@@ -905,6 +941,7 @@ namespace Mapsui.UI.Forms
             // Add MapView layers
             _mapControl.Map.Layers.Add(_mapDrawableLayer);
             _mapControl.Map.Layers.Add(_mapPinLayer);
+            _mapControl.Map.Layers.Add(_mapCalloutLayer);
             _mapControl.Map.Layers.Add(_mapMyLocationLayer);
         }
 
@@ -915,6 +952,7 @@ namespace Mapsui.UI.Forms
         {
             // Remove MapView layers
             _mapControl.Map.Layers.Remove(_mapMyLocationLayer);
+            _mapControl.Map.Layers.Remove(_mapCalloutLayer);
             _mapControl.Map.Layers.Remove(_mapPinLayer);
             _mapControl.Map.Layers.Remove(_mapDrawableLayer);
         }

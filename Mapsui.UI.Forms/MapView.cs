@@ -726,10 +726,12 @@ namespace Mapsui.UI.Forms
             {
                 foreach (var item in e.NewItems)
                 {
-                    // Add new pins to layer
-                    var pin = item as Pin;
-
-                    if (pin != null) pin.PropertyChanged += HandlerPinPropertyChanged;
+                    if (item is Pin pin)
+                    {
+                        // Add new pins to layer, so set MapView
+                        pin.MapView = this;
+                        pin.PropertyChanged += HandlerPinPropertyChanged;
+                    }
                 }
             }
 

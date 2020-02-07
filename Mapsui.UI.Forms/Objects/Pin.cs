@@ -12,11 +12,11 @@ using Xamarin.Forms;
 
 namespace Mapsui.UI.Forms
 {
-    public class Pin : BindableObject, IFeatureProvider
+    public class Pin : BindableObject, IFeatureProvider, IClickable
     {
         private int _bitmapId = -1;
         private byte[] _bitmapData;
-        private readonly MapView _mapView;
+        private MapView _mapView;
 
         public static readonly BindableProperty TypeProperty = BindableProperty.Create(nameof(Type), typeof(PinType), typeof(Pin), default(PinType));
         public static readonly BindableProperty ColorProperty = BindableProperty.Create(nameof(Color), typeof(Xamarin.Forms.Color), typeof(Pin), SKColors.Red.ToFormsColor());
@@ -47,6 +47,14 @@ namespace Mapsui.UI.Forms
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="T:Mapsui.UI.Forms.Pin"/> class
+        /// </summary>
+        /// <param name="mapView">MapView to which this pin belongs</param>
+        public Pin()
+        {
+        }
+
+        /// <summary>
         /// Internal MapView for refreshing of screen
         /// </summary>
         internal MapView MapView
@@ -55,6 +63,22 @@ namespace Mapsui.UI.Forms
             { 
                 return _mapView; 
             } 
+            set
+            {
+                if (_mapView != value)
+                {
+                    if (_callout != null)
+                    {
+                        _mapView.RemoveCallout(_callout);
+                        _callout = null;
+                    }
+                    _feature = null;
+
+                    _mapView = value;
+
+                    CreateFeature();
+                }
+            }
         }
 
         /// <summary>

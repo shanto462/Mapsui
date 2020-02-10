@@ -39,9 +39,9 @@ namespace Mapsui.UI.Forms
         private readonly SKPicture _pictMyLocationNoCenter;
         private readonly SKPicture _pictMyLocationCenter;
 
-        readonly ObservableCollection<Pin> _pins = new ObservableCollection<Pin>();
-        readonly ObservableCollection<Drawable> _drawable = new ObservableCollection<Drawable>();
-        readonly ObservableCollection<Callout> _callouts = new ObservableCollection<Callout>();
+        readonly ObservableRangeCollection<Pin> _pins = new ObservableRangeCollection<Pin>();
+        readonly ObservableRangeCollection<Drawable> _drawable = new ObservableRangeCollection<Drawable>();
+        readonly ObservableRangeCollection<Callout> _callouts = new ObservableRangeCollection<Callout>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="T:Mapsui.UI.Forms.MapView"/> class.

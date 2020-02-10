@@ -12,7 +12,7 @@ using Xamarin.Forms;
 
 namespace Mapsui.UI.Forms
 {
-    public class Pin : BindableObject, IFeatureProvider, IClickable
+    public class Pin : BindableObject, IFeatureProvider
     {
         private int _bitmapId = -1;
         private byte[] _bitmapData;
@@ -69,11 +69,10 @@ namespace Mapsui.UI.Forms
                 {
                     if (_callout != null)
                     {
-                        _mapView.RemoveCallout(_callout);
-                        _callout = null;
+                        _mapView?.RemoveCallout(_callout);
                     }
+                    
                     _feature = null;
-
                     _mapView = value;
 
                     CreateFeature();
@@ -304,7 +303,7 @@ namespace Mapsui.UI.Forms
         /// <returns>True, if callout is visible on map</returns>
         public bool IsCalloutVisible()
         {
-            return _mapView.IsCalloutVisible(_callout);
+            return _mapView != null ? _mapView.IsCalloutVisible(_callout) : false;
         }
 
         /// <summary>
@@ -358,15 +357,19 @@ namespace Mapsui.UI.Forms
             switch (propertyName)
             {
                 case nameof(Position):
-                    _feature.Geometry = Position.ToMapsui();
-                    _callout.Feature.Geometry = _feature.Geometry;
+                    if (_feature != null)
+                    {
+                        _feature.Geometry = Position.ToMapsui();
+                        _callout.Feature.Geometry = _feature.Geometry;
+                    }
                     break;
                 case nameof(Label):
-                    _feature["Label"] = Label;
-                        Callout.Title = Label;
+                    if (_feature != null)
+                        _feature["Label"] = Label;
+                    Callout.Title = Label;
                     break;
                 case nameof(Address):
-                        Callout.Subtitle = Address;
+                    Callout.Subtitle = Address;
                     break;
                 case nameof(Transparency):
                     ((SymbolStyle)_feature.Styles.First()).Opacity = 1 - Transparency;
@@ -420,6 +423,8 @@ namespace Mapsui.UI.Forms
                         Geometry = Position.ToMapsui(),
                         ["Label"] = Label,
                     };
+                    if (_callout != null)
+                        _callout.Feature.Geometry = Position.ToMapsui();
                 }
                 // Check for bitmapId
                 if (_bitmapId != -1)

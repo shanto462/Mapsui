@@ -114,7 +114,10 @@ namespace Mapsui.UI.Objects
             }
 
             _pin = pin;
-            Feature = (Feature)_pin.Feature.Copy();
+            if (_pin.Feature != null)
+                Feature = (Feature)_pin.Feature.Copy();
+            else
+                Feature = new Feature();
             Feature.Styles.Clear();
         }
 
@@ -543,7 +546,7 @@ namespace Mapsui.UI.Objects
                     break;
             }
 
-            _pin.MapView.Refresh();
+            _pin?.MapView?.Refresh();
         }
 
         /// <summary>

@@ -80,19 +80,19 @@ namespace Mapsui.UI.Objects
         public static readonly BindableProperty TypeProperty = BindableProperty.Create(nameof(Type), typeof(CalloutType), typeof(MapView), default(CalloutType));
         public static readonly BindableProperty AnchorProperty = BindableProperty.Create(nameof(Anchor), typeof(Xamarin.Forms.Point), typeof(MapView), default(Xamarin.Forms.Point));
         public static readonly BindableProperty ArrowAlignmentProperty = BindableProperty.Create(nameof(ArrowAlignment), typeof(ArrowAlignment), typeof(MapView), default(ArrowAlignment), defaultBindingMode: BindingMode.TwoWay);
-        public static readonly BindableProperty ArrowWidthProperty = BindableProperty.Create(nameof(ArrowWidth), typeof(float), typeof(MapView), 12f);
-        public static readonly BindableProperty ArrowHeightProperty = BindableProperty.Create(nameof(ArrowHeight), typeof(float), typeof(MapView), 16f);
-        public static readonly BindableProperty ArrowPositionProperty = BindableProperty.Create(nameof(ArrowPosition), typeof(float), typeof(MapView), 0.5f);
+        public static readonly BindableProperty ArrowWidthProperty = BindableProperty.Create(nameof(ArrowWidth), typeof(double), typeof(MapView), 12.0);
+        public static readonly BindableProperty ArrowHeightProperty = BindableProperty.Create(nameof(ArrowHeight), typeof(double), typeof(MapView), 16.0);
+        public static readonly BindableProperty ArrowPositionProperty = BindableProperty.Create(nameof(ArrowPosition), typeof(double), typeof(MapView), 0.5);
         public static readonly BindableProperty ColorProperty = BindableProperty.Create(nameof(Color), typeof(Xamarin.Forms.Color), typeof(MapView), Xamarin.Forms.Color.White);
         public static readonly BindableProperty BackgroundColorProperty = BindableProperty.Create(nameof(BackgroundColor), typeof(Xamarin.Forms.Color), typeof(MapView), Xamarin.Forms.Color.White);
-        public static readonly BindableProperty ShadowWidthProperty = BindableProperty.Create(nameof(ShadowWidth), typeof(float), typeof(MapView), default(float));
-        public static readonly BindableProperty StrokeWidthProperty = BindableProperty.Create(nameof(StrokeWidth), typeof(float), typeof(MapView), default(float));
-        public static readonly BindableProperty RotationProperty = BindableProperty.Create(nameof(Rotation), typeof(float), typeof(MapView), default(float));
+        public static readonly BindableProperty ShadowWidthProperty = BindableProperty.Create(nameof(ShadowWidth), typeof(double), typeof(MapView), default(double));
+        public static readonly BindableProperty StrokeWidthProperty = BindableProperty.Create(nameof(StrokeWidth), typeof(double), typeof(MapView), default(double));
+        public static readonly BindableProperty RotationProperty = BindableProperty.Create(nameof(Rotation), typeof(double), typeof(MapView), default(double));
         public static readonly BindableProperty RotateWithMapProperty = BindableProperty.Create(nameof(RotateWithMap), typeof(bool), typeof(MapView), false);
-        public static readonly BindableProperty RectRadiusProperty = BindableProperty.Create(nameof(RectRadius), typeof(float), typeof(MapView), default(float));
+        public static readonly BindableProperty RectRadiusProperty = BindableProperty.Create(nameof(RectRadius), typeof(double), typeof(MapView), default(double));
         public static readonly BindableProperty PaddingProperty = BindableProperty.Create(nameof(Padding), typeof(Thickness), typeof(MapView), new Thickness(6));
-        public static readonly BindableProperty SpacingProperty = BindableProperty.Create(nameof(Spacing), typeof(float), typeof(MapView), 2f);
-        public static readonly BindableProperty MaxWidthProperty = BindableProperty.Create(nameof(MaxWidth), typeof(float), typeof(MapView), 300f);
+        public static readonly BindableProperty SpacingProperty = BindableProperty.Create(nameof(Spacing), typeof(double), typeof(MapView), 2.0);
+        public static readonly BindableProperty MaxWidthProperty = BindableProperty.Create(nameof(MaxWidth), typeof(double), typeof(MapView), 300.0);
         // public static readonly BindableProperty IsCloseVisibleProperty = BindableProperty.Create(nameof(IsCloseVisible), typeof(bool), typeof(MapView), true);
         public static readonly BindableProperty IsClosableByClickProperty = BindableProperty.Create(nameof(IsClosableByClick), typeof(bool), typeof(MapView), true);
         public static readonly BindableProperty ContentProperty = BindableProperty.Create(nameof(Content), typeof(int), typeof(MapView), -1);
@@ -154,27 +154,27 @@ namespace Mapsui.UI.Objects
         /// <summary>
         /// Width of opening of anchor of Callout
         /// </summary>
-        public float ArrowWidth
+        public double ArrowWidth
         {
-            get { return (float)GetValue(ArrowWidthProperty); }
+            get { return (double)GetValue(ArrowWidthProperty); }
             set { SetValue(ArrowWidthProperty, value); }
         }
 
         /// <summary>
         /// Height of anchor of Callout
         /// </summary>
-        public float ArrowHeight
+        public double ArrowHeight
         {
-            get { return (float)GetValue(ArrowHeightProperty); }
+            get { return (double)GetValue(ArrowHeightProperty); }
             set { SetValue(ArrowHeightProperty, value); }
         }
 
         /// <summary>
         /// Relative position of anchor of Callout on the side given by AnchorType
         /// </summary>
-        public float ArrowPosition
+        public double ArrowPosition
         {
-            get { return (float)GetValue(ArrowPositionProperty); }
+            get { return (double)GetValue(ArrowPositionProperty); }
             set { SetValue(ArrowPositionProperty, value); }
         }
 
@@ -199,27 +199,27 @@ namespace Mapsui.UI.Objects
         /// <summary>
         /// Shadow width around Callout
         /// </summary>
-        public float ShadowWidth
+        public double ShadowWidth
         {
-            get { return (float)GetValue(ShadowWidthProperty); }
+            get { return (double)GetValue(ShadowWidthProperty); }
             set { SetValue(ShadowWidthProperty, value); }
         }
 
         /// <summary>
         /// Stroke width of frame around Callout
         /// </summary>
-        public float StrokeWidth
+        public double StrokeWidth
         {
-            get { return (float)GetValue(StrokeWidthProperty); }
+            get { return (double)GetValue(StrokeWidthProperty); }
             set { SetValue(StrokeWidthProperty, value); }
         }
 
         /// <summary>
         /// Rotation of Callout around the anchor
         /// </summary>
-        public float Rotation
+        public double Rotation
         {
-            get { return (float)GetValue(RotationProperty); }
+            get { return (double)GetValue(RotationProperty); }
             set { SetValue(RotationProperty, value); }
         }
 
@@ -235,9 +235,9 @@ namespace Mapsui.UI.Objects
         /// <summary>
         /// Radius of rounded corners of Callout
         /// </summary>
-        public float RectRadius
+        public double RectRadius
         {
-            get { return (float)GetValue(RectRadiusProperty); }
+            get { return (double)GetValue(RectRadiusProperty); }
             set { SetValue(RectRadiusProperty, value); }
         }
 
@@ -253,18 +253,18 @@ namespace Mapsui.UI.Objects
         /// <summary>
         /// Space between Title and Subtitel of Callout
         /// </summary>
-        public float Spacing
+        public double Spacing
         {
-            get { return (float)GetValue(SpacingProperty); }
+            get { return (double)GetValue(SpacingProperty); }
             set { SetValue(SpacingProperty, value); }
         }
 
         /// <summary>
         /// MaxWidth for Title and Subtitel of Callout
         /// </summary>
-        public float MaxWidth
+        public double MaxWidth
         {
-            get { return (float)GetValue(MaxWidthProperty); }
+            get { return (double)GetValue(MaxWidthProperty); }
             set { SetValue(MaxWidthProperty, value); }
         }
 
@@ -544,17 +544,17 @@ namespace Mapsui.UI.Objects
             }
 
             style.ArrowAlignment = (Mapsui.Styles.ArrowAlignment)ArrowAlignment;
-            style.ArrowHeight = ArrowHeight;
-            style.ArrowPosition = ArrowPosition;
+            style.ArrowHeight = (float)ArrowHeight;
+            style.ArrowPosition = (float)ArrowPosition;
             style.BackgroundColor = BackgroundColor.ToMapsui(); ;
             style.Color = Color.ToMapsui();
             style.Offset = new Geometries.Point(Anchor.X, Anchor.Y);
             style.Padding = new BoundingBox(Padding.Left, Padding.Top, Padding.Right, Padding.Bottom);
-            style.RectRadius = RectRadius;
+            style.RectRadius = (float)RectRadius;
             style.RotateWithMap = RotateWithMap;
-            style.Rotation = Rotation;
-            style.ShadowWidth = ShadowWidth;
-            style.StrokeWidth = StrokeWidth;
+            style.Rotation = (float)Rotation;
+            style.ShadowWidth = (float)ShadowWidth;
+            style.StrokeWidth = (float)StrokeWidth;
             style.Content = Content;
 
             var margin = Padding;
@@ -592,8 +592,7 @@ namespace Mapsui.UI.Objects
         /// </summary>
         private void CreateContent()
         {
-            _textBlockTitle.MaxWidth = MaxWidth;
-            _textBlockSubtitle.MaxWidth = MaxWidth;
+            _textBlockTitle.MaxWidth = _textBlockSubtitle.MaxWidth = (float)MaxWidth;
             // Layout TextBlocks
             _textBlockTitle.Layout();
             _textBlockSubtitle.Layout();
@@ -614,7 +613,7 @@ namespace Mapsui.UI.Objects
                 canvas.Clear(SKColors.Transparent);
                 // surface.Canvas.Scale(DeviceDpi / 96.0f);
                 _textBlockTitle.Paint(canvas, new TextPaintOptions() { IsAntialias = true });
-                _textBlockSubtitle.Paint(canvas, new SKPoint(0, _textBlockTitle.MeasuredHeight + Spacing), new TextPaintOptions() { IsAntialias = true });
+                _textBlockSubtitle.Paint(canvas, new SKPoint(0, _textBlockTitle.MeasuredHeight + (float)Spacing), new TextPaintOptions() { IsAntialias = true });
                 SKPixmap.Encode(wstream, bitmap, SKEncodedImageFormat.Png, 100);
                 Content = BitmapRegistry.Instance.Register(memStream);
             }

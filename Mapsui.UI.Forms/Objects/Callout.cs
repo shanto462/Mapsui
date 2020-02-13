@@ -59,7 +59,8 @@ namespace Mapsui.UI.Objects
     public class Callout : BindableObject, IFeatureProvider
     {
         private Pin _pin;
-        private TextBlock _textBlock;
+        private TextBlock _textBlockTitle;
+        private TextBlock _textBlockSubtitle;
         private bool _updating = false;
 
         public event EventHandler<EventArgs> CalloutClosed;
@@ -90,6 +91,7 @@ namespace Mapsui.UI.Objects
         public static readonly BindableProperty RotateWithMapProperty = BindableProperty.Create(nameof(RotateWithMap), typeof(bool), typeof(MapView), false);
         public static readonly BindableProperty RectRadiusProperty = BindableProperty.Create(nameof(RectRadius), typeof(float), typeof(MapView), default(float));
         public static readonly BindableProperty PaddingProperty = BindableProperty.Create(nameof(Padding), typeof(Thickness), typeof(MapView), new Thickness(6));
+        public static readonly BindableProperty SpacingProperty = BindableProperty.Create(nameof(Spacing), typeof(float), typeof(MapView), 2f);
         // public static readonly BindableProperty IsCloseVisibleProperty = BindableProperty.Create(nameof(IsCloseVisible), typeof(bool), typeof(MapView), true);
         public static readonly BindableProperty IsClosableByClickProperty = BindableProperty.Create(nameof(IsClosableByClick), typeof(bool), typeof(MapView), true);
         public static readonly BindableProperty ContentProperty = BindableProperty.Create(nameof(Content), typeof(int), typeof(MapView), -1);
@@ -245,6 +247,15 @@ namespace Mapsui.UI.Objects
         {
             get { return (Thickness)GetValue(PaddingProperty); }
             set { SetValue(PaddingProperty, value); }
+        }
+
+        /// <summary>
+        /// Space between Title and Subtitel of Callout
+        /// </summary>
+        public float Spacing
+        {
+            get { return (float)GetValue(SpacingProperty); }
+            set { SetValue(SpacingProperty, value); }
         }
 
         /// <summary>
@@ -408,7 +419,8 @@ namespace Mapsui.UI.Objects
                 || propertyName.Equals(nameof(SubtitleFontSize))
                 || propertyName.Equals(nameof(SubtitleFontAttributes))
                 || propertyName.Equals(nameof(SubtitleFontColor))
-                || propertyName.Equals(nameof(SubtitleTextAlignment)))
+                || propertyName.Equals(nameof(SubtitleTextAlignment))
+                || propertyName.Equals(nameof(Spacing)))
                 )
             {
                 UpdateContent();
@@ -453,13 +465,13 @@ namespace Mapsui.UI.Objects
 
             _updating = true;
 
-            if (_textBlock == null)
+            if (_textBlockTitle == null)
             {
-                _textBlock = new TextBlock();
+                _textBlockTitle = new TextBlock();
             }
             else
             {
-                _textBlock.Clear();
+                _textBlockTitle.Clear();
             }
 
             var styleTitle = new Topten.RichTextKit.Style()
@@ -470,6 +482,15 @@ namespace Mapsui.UI.Objects
                 FontWeight = TitleFontAttributes == FontAttributes.Bold ? 700 : 400,
                 TextColor = new SkiaSharp.SKColor((byte)(TitleFontColor.R * 256), (byte)(TitleFontColor.G * 256), (byte)(TitleFontColor.B * 256)),
             };
+
+            if (_textBlockSubtitle == null)
+            {
+                _textBlockSubtitle = new TextBlock();
+            }
+            else
+            {
+                _textBlockSubtitle.Clear();
+            }
 
             var styleSubtitle = new Topten.RichTextKit.Style()
             {
@@ -482,16 +503,13 @@ namespace Mapsui.UI.Objects
 
             switch (Type)
             {
-                case CalloutType.Single:
-                    _textBlock.Alignment = (Topten.RichTextKit.TextAlignment)(TitleTextAlignment + 1);
-                    _textBlock.AddText(Title, styleTitle);
-                    CreateContent();
-                    break;
                 case CalloutType.Detail:
-                    _textBlock.Alignment = (Topten.RichTextKit.TextAlignment)(TitleTextAlignment + 1);
-                    _textBlock.AddText(Title, styleTitle);
-                    _textBlock.AddText("\n", styleTitle);
-                    _textBlock.AddText(Subtitle, styleSubtitle);
+                    _textBlockSubtitle.Alignment = (Topten.RichTextKit.TextAlignment)(SubtitleTextAlignment + 1);
+                    _textBlockSubtitle.AddText(Subtitle, styleSubtitle);
+                    goto case CalloutType.Single;
+                case CalloutType.Single:
+                    _textBlockTitle.Alignment = (Topten.RichTextKit.TextAlignment)(TitleTextAlignment + 1);
+                    _textBlockTitle.AddText(Title, styleTitle);
                     CreateContent();
                     break;
                 case CalloutType.Custom:
@@ -563,10 +581,19 @@ namespace Mapsui.UI.Objects
         /// </summary>
         private void CreateContent()
         {
-            // Layout TextBlock
-            _textBlock.Layout();
+            _textBlockTitle.MaxWidth = _textBlockSubtitle.MaxWidth = 300;
+            // Layout TextBlocks
+            _textBlockTitle.Layout();
+            _textBlockSubtitle.Layout();
+            // Get sizes
+            var width = Math.Max(_textBlockTitle.MeasuredWidth, _textBlockSubtitle.MeasuredWidth);
+            var height = _textBlockTitle.MeasuredHeight + (Type == CalloutType.Detail ? _textBlockSubtitle.MeasuredHeight + Spacing : 0);
+            // Now we have the correct width, so make a new layout cycle for text alignment
+            _textBlockTitle.MaxWidth = _textBlockSubtitle.MaxWidth = width;
+            _textBlockTitle.Layout();
+            _textBlockSubtitle.Layout();
             // Create bitmap from TextBlock
-            var info = new SKImageInfo((int)(_textBlock.MeasuredWidth+1), (int)(_textBlock.MeasuredHeight+1), SKImageInfo.PlatformColorType, SKAlphaType.Premul);
+            var info = new SKImageInfo((int)width, (int)height, SKImageInfo.PlatformColorType, SKAlphaType.Premul);
             var memStream = new MemoryStream();
             using (var bitmap = new SKBitmap(info))
             using (var canvas = new SKCanvas(bitmap))
@@ -574,7 +601,8 @@ namespace Mapsui.UI.Objects
             {
                 canvas.Clear(SKColors.Transparent);
                 // surface.Canvas.Scale(DeviceDpi / 96.0f);
-                _textBlock.Paint(canvas);
+                _textBlockTitle.Paint(canvas, new TextPaintOptions() { IsAntialias = true });
+                _textBlockSubtitle.Paint(canvas, new SKPoint(0, _textBlockTitle.MeasuredHeight + Spacing), new TextPaintOptions() { IsAntialias = true });
                 SKPixmap.Encode(wstream, bitmap, SKEncodedImageFormat.Png, 100);
                 Content = BitmapRegistry.Instance.Register(memStream);
             }

@@ -77,37 +77,159 @@ namespace Mapsui.UI.Objects
         public static Xamarin.Forms.Color DefaultSubtitleFontColor = Xamarin.Forms.Color.Black;
         public static Xamarin.Forms.TextAlignment DefaultSubtitleTextAlignment = Xamarin.Forms.TextAlignment.Start; // Center;
 
+        #region Bindings
+
+        /// <summary>
+        /// Bindable property for the <see cref="Type"/> property
+        /// </summary>
         public static readonly BindableProperty TypeProperty = BindableProperty.Create(nameof(Type), typeof(CalloutType), typeof(MapView), default(CalloutType));
+
+        /// <summary>
+        /// Bindable property for the <see cref="Anchor"/> property
+        /// </summary>
         public static readonly BindableProperty AnchorProperty = BindableProperty.Create(nameof(Anchor), typeof(Xamarin.Forms.Point), typeof(MapView), default(Xamarin.Forms.Point));
+
+        /// <summary>
+        /// Bindable property for the <see cref="ArrowAlignment"/> property
+        /// </summary>
         public static readonly BindableProperty ArrowAlignmentProperty = BindableProperty.Create(nameof(ArrowAlignment), typeof(ArrowAlignment), typeof(MapView), default(ArrowAlignment), defaultBindingMode: BindingMode.TwoWay);
+
+        /// <summary>
+        /// Bindable property for the <see cref="ArrowWidth"/> property
+        /// </summary>
         public static readonly BindableProperty ArrowWidthProperty = BindableProperty.Create(nameof(ArrowWidth), typeof(double), typeof(MapView), 12.0);
+
+        /// <summary>
+        /// Bindable property for the <see cref="ArrowHeight"/> property
+        /// </summary>
         public static readonly BindableProperty ArrowHeightProperty = BindableProperty.Create(nameof(ArrowHeight), typeof(double), typeof(MapView), 16.0);
+
+        /// <summary>
+        /// Bindable property for the <see cref="ArrowPosition"/> property
+        /// </summary>
         public static readonly BindableProperty ArrowPositionProperty = BindableProperty.Create(nameof(ArrowPosition), typeof(double), typeof(MapView), 0.5);
+
+        /// <summary>
+        /// Bindable property for the <see cref="Color"/> property
+        /// </summary>
         public static readonly BindableProperty ColorProperty = BindableProperty.Create(nameof(Color), typeof(Xamarin.Forms.Color), typeof(MapView), Xamarin.Forms.Color.White);
+
+        /// <summary>
+        /// Bindable property for the <see cref="BackgroundColor"/> property
+        /// </summary>
         public static readonly BindableProperty BackgroundColorProperty = BindableProperty.Create(nameof(BackgroundColor), typeof(Xamarin.Forms.Color), typeof(MapView), Xamarin.Forms.Color.White);
+
+        /// <summary>
+        /// Bindable property for the <see cref="ShadowWidth"/> property
+        /// </summary>
         public static readonly BindableProperty ShadowWidthProperty = BindableProperty.Create(nameof(ShadowWidth), typeof(double), typeof(MapView), default(double));
+
+        /// <summary>
+        /// Bindable property for the <see cref="StrokeWidth"/> property
+        /// </summary>
         public static readonly BindableProperty StrokeWidthProperty = BindableProperty.Create(nameof(StrokeWidth), typeof(double), typeof(MapView), default(double));
+
+        /// <summary>
+        /// Bindable property for the <see cref="Rotation"/> property
+        /// </summary>
         public static readonly BindableProperty RotationProperty = BindableProperty.Create(nameof(Rotation), typeof(double), typeof(MapView), default(double));
+
+        /// <summary>
+        /// Bindable property for the <see cref="RotateWithMap"/> property
+        /// </summary>
         public static readonly BindableProperty RotateWithMapProperty = BindableProperty.Create(nameof(RotateWithMap), typeof(bool), typeof(MapView), false);
+
+        /// <summary>
+        /// Bindable property for the <see cref="RectRadius"/> property
+        /// </summary>
         public static readonly BindableProperty RectRadiusProperty = BindableProperty.Create(nameof(RectRadius), typeof(double), typeof(MapView), default(double));
+
+        /// <summary>
+        /// Bindable property for the <see cref="Padding"/> property
+        /// </summary>
         public static readonly BindableProperty PaddingProperty = BindableProperty.Create(nameof(Padding), typeof(Thickness), typeof(MapView), new Thickness(6));
+
+        /// <summary>
+        /// Bindable property for the <see cref="Spacing"/> property
+        /// </summary>
         public static readonly BindableProperty SpacingProperty = BindableProperty.Create(nameof(Spacing), typeof(double), typeof(MapView), 2.0);
+
+        /// <summary>
+        /// Bindable property for the <see cref="MaxWidth"/> property
+        /// </summary>
         public static readonly BindableProperty MaxWidthProperty = BindableProperty.Create(nameof(MaxWidth), typeof(double), typeof(MapView), 300.0);
-        // public static readonly BindableProperty IsCloseVisibleProperty = BindableProperty.Create(nameof(IsCloseVisible), typeof(bool), typeof(MapView), true);
+
+        /// <summary>
+        /// Bindable property for the <see cref="IsClosableByClick"/> property
+        /// </summary>
         public static readonly BindableProperty IsClosableByClickProperty = BindableProperty.Create(nameof(IsClosableByClick), typeof(bool), typeof(MapView), true);
+
+        /// <summary>
+        /// Bindable property for the <see cref="Content"/> property
+        /// </summary>
         public static readonly BindableProperty ContentProperty = BindableProperty.Create(nameof(Content), typeof(int), typeof(MapView), -1);
+
+        /// <summary>
+        /// Bindable property for the <see cref="Title"/> property
+        /// </summary>
         public static readonly BindableProperty TitleProperty = BindableProperty.Create(nameof(Title), typeof(string), typeof(MapView), default(string));
+
+        /// <summary>
+        /// Bindable property for the <see cref="TitleFontName"/> property
+        /// </summary>
         public static readonly BindableProperty TitleFontNameProperty = BindableProperty.Create(nameof(TitleFontName), typeof(string), typeof(MapView), DefaultTitleFontName);
+
+        /// <summary>
+        /// Bindable property for the <see cref="TitleFontSize"/> property
+        /// </summary>
         public static readonly BindableProperty TitleFontSizeProperty = BindableProperty.Create(nameof(TitleFontSize), typeof(double), typeof(MapView), DefaultTitleFontSize);
+
+        /// <summary>
+        /// Bindable property for the <see cref="TitleFontAttributes"/> property
+        /// </summary>
         public static readonly BindableProperty TitleFontAttributesProperty = BindableProperty.Create(nameof(TitleFontAttributes), typeof(FontAttributes), typeof(MapView), DefaultTitleFontAttributes);
+
+        /// <summary>
+        /// Bindable property for the <see cref="TitleFontColor"/> property
+        /// </summary>
         public static readonly BindableProperty TitleFontColorProperty = BindableProperty.Create(nameof(TitleFontColor), typeof(Xamarin.Forms.Color), typeof(MapView), DefaultTitleFontColor);
+
+        /// <summary>
+        /// Bindable property for the <see cref="TitleTextAlignment"/> property
+        /// </summary>
         public static readonly BindableProperty TitleTextAlignmentProperty = BindableProperty.Create(nameof(TitleTextAlignment), typeof(Xamarin.Forms.TextAlignment), typeof(MapView), DefaultTitleTextAlignment);
+
+        /// <summary>
+        /// Bindable property for the <see cref="Subtitle"/> property
+        /// </summary>
         public static readonly BindableProperty SubtitleProperty = BindableProperty.Create(nameof(Subtitle), typeof(string), typeof(MapView), default(string));
+
+        /// <summary>
+        /// Bindable property for the <see cref="SubtitleFontName"/> property
+        /// </summary>
         public static readonly BindableProperty SubtitleFontNameProperty = BindableProperty.Create(nameof(SubtitleFontName), typeof(string), typeof(MapView), DefaultSubtitleFontName);
+
+        /// <summary>
+        /// Bindable property for the <see cref="SubtitleFontSize"/> property
+        /// </summary>
         public static readonly BindableProperty SubtitleFontSizeProperty = BindableProperty.Create(nameof(SubtitleFontSize), typeof(double), typeof(MapView), DefaultSubtitleFontSize);
+
+        /// <summary>
+        /// Bindable property for the <see cref="SubtitleFontAttributes"/> property
+        /// </summary>
         public static readonly BindableProperty SubtitleFontAttributesProperty = BindableProperty.Create(nameof(SubtitleFontAttributes), typeof(FontAttributes), typeof(MapView), DefaultSubtitleFontAttributes);
+
+        /// <summary>
+        /// Bindable property for the <see cref="SubtitleFontColor"/> property
+        /// </summary>
         public static readonly BindableProperty SubtitleFontColorProperty = BindableProperty.Create(nameof(SubtitleFontColor), typeof(Xamarin.Forms.Color), typeof(MapView), DefaultSubtitleFontColor);
+
+        /// <summary>
+        /// Bindable property for the <see cref="SubtitleTextAlignment"/> property
+        /// </summary>
         public static readonly BindableProperty SubtitleTextAlignmentProperty = BindableProperty.Create(nameof(SubtitleTextAlignment), typeof(Xamarin.Forms.TextAlignment), typeof(MapView), DefaultSubtitleTextAlignment);
+
+        #endregion
 
         public Callout(Pin pin)
         {
@@ -127,6 +249,9 @@ namespace Mapsui.UI.Objects
         /// <summary>
         /// Type of Callout
         /// </summary>
+        /// <remarks>
+        /// Could be single, detail or custom. The last is a bitmap id for an owner drawn image.
+        /// </remarks>
         public CalloutType Type
         {
             get { return (CalloutType)GetValue(TypeProperty); }
@@ -143,7 +268,7 @@ namespace Mapsui.UI.Objects
         }
 
         /// <summary>
-        /// Anchor position of Callout
+        /// Arrow alignment of Callout
         /// </summary>
         public ArrowAlignment ArrowAlignment
         {
@@ -152,7 +277,7 @@ namespace Mapsui.UI.Objects
         }
 
         /// <summary>
-        /// Width of opening of anchor of Callout
+        /// Width from arrow of Callout
         /// </summary>
         public double ArrowWidth
         {
@@ -161,7 +286,7 @@ namespace Mapsui.UI.Objects
         }
 
         /// <summary>
-        /// Height of anchor of Callout
+        /// Height from arrow of Callout
         /// </summary>
         public double ArrowHeight
         {
@@ -170,7 +295,7 @@ namespace Mapsui.UI.Objects
         }
 
         /// <summary>
-        /// Relative position of anchor of Callout on the side given by AnchorType
+        /// Relative position of anchor of Callout on the side given by <see cref="ArrowAlignment">
         /// </summary>
         public double ArrowPosition
         {
@@ -224,7 +349,7 @@ namespace Mapsui.UI.Objects
         }
 
         /// <summary>
-        /// Rotate of Callout with map
+        /// Rotate Callout with map
         /// </summary>
         public bool RotateWithMap
         {
@@ -295,7 +420,7 @@ namespace Mapsui.UI.Objects
         }
 
         /// <summary>
-        /// Content of Callout header
+        /// Content of Callout title label
         /// </summary>
         public string Title
         {
@@ -340,7 +465,7 @@ namespace Mapsui.UI.Objects
         }
 
         /// <summary>
-        /// Text alignment to render title
+        /// Text alignment of title
         /// </summary>
         public Xamarin.Forms.TextAlignment TitleTextAlignment
         {
@@ -394,7 +519,7 @@ namespace Mapsui.UI.Objects
         }
 
         /// <summary>
-        /// Text alignment to render title
+        /// Text alignment of title
         /// </summary>
         public Xamarin.Forms.TextAlignment SubtitleTextAlignment
         {
@@ -403,7 +528,7 @@ namespace Mapsui.UI.Objects
         }
 
         /// <summary>
-        /// Feature, which belongs to callout. Should be the same as for the pin.
+        /// Feature, which belongs to callout. Should be the same as for the pin to which this callout belongs.
         /// </summary>
         public Feature Feature { get; }
 

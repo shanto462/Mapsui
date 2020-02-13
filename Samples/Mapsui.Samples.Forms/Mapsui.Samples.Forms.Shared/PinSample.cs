@@ -65,7 +65,6 @@ namespace Mapsui.Samples.Forms
                     pin.Callout.ArrowAlignment = (ArrowAlignment)rnd.Next(0, 4);
                     pin.Callout.ArrowPosition = rnd.Next(0, 100) / 100;
                     pin.Callout.Padding = new Thickness(rnd.Next(0, 20), rnd.Next(0, 20));
-                    pin.Callout.Spacing = rnd.Next(0, 10);
                     pin.Callout.BackgroundColor = Color.White;
                     pin.Callout.Color = pin.Color;
                     if (rnd.Next(0, 3) < 2)
@@ -76,6 +75,9 @@ namespace Mapsui.Samples.Forms
                         pin.Callout.SubtitleFontSize = pin.Callout.TitleFontSize - 5;
                         pin.Callout.TitleFontColor = new Xamarin.Forms.Color(rnd.Next(0, 256) / 256.0, rnd.Next(0, 256) / 256.0, rnd.Next(0, 256) / 256.0);
                         pin.Callout.SubtitleFontColor = pin.Color;
+                        pin.Callout.SubtitleTextAlignment = TextAlignment.Center;
+                        pin.Callout.Spacing = rnd.Next(0, 10);
+                        pin.Callout.MaxWidth = rnd.Next(100, 200);
                     }
                     else
                     {

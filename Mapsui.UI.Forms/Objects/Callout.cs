@@ -92,6 +92,7 @@ namespace Mapsui.UI.Objects
         public static readonly BindableProperty RectRadiusProperty = BindableProperty.Create(nameof(RectRadius), typeof(float), typeof(MapView), default(float));
         public static readonly BindableProperty PaddingProperty = BindableProperty.Create(nameof(Padding), typeof(Thickness), typeof(MapView), new Thickness(6));
         public static readonly BindableProperty SpacingProperty = BindableProperty.Create(nameof(Spacing), typeof(float), typeof(MapView), 2f);
+        public static readonly BindableProperty MaxWidthProperty = BindableProperty.Create(nameof(MaxWidth), typeof(float), typeof(MapView), 300f);
         // public static readonly BindableProperty IsCloseVisibleProperty = BindableProperty.Create(nameof(IsCloseVisible), typeof(bool), typeof(MapView), true);
         public static readonly BindableProperty IsClosableByClickProperty = BindableProperty.Create(nameof(IsClosableByClick), typeof(bool), typeof(MapView), true);
         public static readonly BindableProperty ContentProperty = BindableProperty.Create(nameof(Content), typeof(int), typeof(MapView), -1);
@@ -259,6 +260,15 @@ namespace Mapsui.UI.Objects
         }
 
         /// <summary>
+        /// MaxWidth for Title and Subtitel of Callout
+        /// </summary>
+        public float MaxWidth
+        {
+            get { return (float)GetValue(MaxWidthProperty); }
+            set { SetValue(MaxWidthProperty, value); }
+        }
+
+        /// <summary>
         /// Is Callout visible on map
         /// </summary>
         public bool IsVisible
@@ -420,7 +430,8 @@ namespace Mapsui.UI.Objects
                 || propertyName.Equals(nameof(SubtitleFontAttributes))
                 || propertyName.Equals(nameof(SubtitleFontColor))
                 || propertyName.Equals(nameof(SubtitleTextAlignment))
-                || propertyName.Equals(nameof(Spacing)))
+                || propertyName.Equals(nameof(Spacing))
+                || propertyName.Equals(nameof(MaxWidth)))
                 )
             {
                 UpdateContent();
@@ -581,7 +592,8 @@ namespace Mapsui.UI.Objects
         /// </summary>
         private void CreateContent()
         {
-            _textBlockTitle.MaxWidth = _textBlockSubtitle.MaxWidth = 300;
+            _textBlockTitle.MaxWidth = MaxWidth;
+            _textBlockSubtitle.MaxWidth = MaxWidth;
             // Layout TextBlocks
             _textBlockTitle.Layout();
             _textBlockSubtitle.Layout();

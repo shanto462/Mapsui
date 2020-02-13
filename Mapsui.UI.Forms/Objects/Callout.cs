@@ -65,12 +65,12 @@ namespace Mapsui.UI.Objects
         public event EventHandler<EventArgs> CalloutClosed;
         public event EventHandler<EventArgs> CalloutClicked;
 
-        public static string DefaultTitleFontName = "Arial";
+        public static string DefaultTitleFontName = Xamarin.Forms.Font.Default.FontFamily;
         public static double DefaultTitleFontSize = Device.GetNamedSize(NamedSize.Title, typeof(Label));
         public static FontAttributes DefaultTitleFontAttributes = FontAttributes.Bold;
         public static Xamarin.Forms.Color DefaultTitleFontColor = Xamarin.Forms.Color.Black;
         public static Xamarin.Forms.TextAlignment DefaultTitleTextAlignment = Xamarin.Forms.TextAlignment.Center;
-        public static string DefaultSubtitleFontName = "Arial";
+        public static string DefaultSubtitleFontName = Xamarin.Forms.Font.Default.FontFamily;
         public static double DefaultSubtitleFontSize = Device.GetNamedSize(NamedSize.Subtitle, typeof(Label));
         public static FontAttributes DefaultSubtitleFontAttributes = FontAttributes.None;
         public static Xamarin.Forms.Color DefaultSubtitleFontColor = Xamarin.Forms.Color.Black;

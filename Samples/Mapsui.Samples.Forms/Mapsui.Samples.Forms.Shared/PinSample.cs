@@ -86,11 +86,20 @@ namespace Mapsui.Samples.Forms
                     }
                     pin.Callout.CalloutClicked += (s, e) =>
                     {
+                        if (e.NumOfTaps == 2)
+                        {
+                            // Double click on callout moves pin
+                            var p = e.Callout.Pin;
+                            p.Position = new Position(p.Position.Latitude + 0.01, p.Position.Longitude);
+                            e.Handled = true;
+                            return;
+                        }
                         if (e.Callout.Title != "You clicked me!")
                         {
                             e.Callout.Type = CalloutType.Single;
                             e.Callout.Title = "You clicked me!";
                             e.Handled = true;
+                            return;
                         }
                     };
                     mapView.Pins.Add(pin);

@@ -40,7 +40,7 @@ namespace Mapsui.UI.Forms
         private bool _updating = false;
 
         public event EventHandler<EventArgs> CalloutClosed;
-        public event EventHandler<EventArgs> CalloutClicked;
+        public event EventHandler<CalloutClickedEventArgs> CalloutClicked;
 
         public static string DefaultTitleFontName = Xamarin.Forms.Font.Default.FontFamily;
         public static double DefaultTitleFontSize = Device.GetNamedSize(NamedSize.Title, typeof(Label));
@@ -573,6 +573,7 @@ namespace Mapsui.UI.Forms
             if (IsClosableByClick)
             {
                 _pin.HideCallout();
+                e.Handled = true;
             }
         }
 

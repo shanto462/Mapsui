@@ -33,7 +33,7 @@ namespace Mapsui.UI.Forms
         // See http://grepcode.com/file/repository.grepcode.com/java/ext/com.google.android/android/4.0.4_r2.1/android/view/ViewConfiguration.java#ViewConfiguration.0PRESSED_STATE_DURATION for values
         private const int shortTap = 125;
         private const int shortClick = 250;
-        private const int delayTap = 200;
+        private const int delayTap = 250;
         private const int longTap = 500;
 
         /// <summary>
@@ -173,25 +173,26 @@ namespace Mapsui.UI.Forms
                     // than longTap, than we have a tap.
                     if (isAround && (ticks - releasedTouch.Tick) < (e.DeviceType == SKTouchDeviceType.Mouse ? shortClick : longTap) * 10000)
                     {
-                        _waitingForDoubleTap = true;
-                        if (UseDoubleTap) { await Task.Delay(delayTap); }
+                        if (UseDoubleTap)
+                        {
+                            _waitingForDoubleTap = true;
+                            await Task.Delay(delayTap).ContinueWith((b) => { _waitingForDoubleTap = false; });
+                        }
 
-                        if (_numOfTaps > 1)
+                        if (!_waitingForDoubleTap && _numOfTaps > 1)
                         {
                             if (!e.Handled)
+                            {
                                 e.Handled = OnDoubleTapped(location, _numOfTaps);
+                            }
+                            _numOfTaps = 0;
                         }
-                        else
+                        else if (!_waitingForDoubleTap && _numOfTaps == 1)
                         {
                             if (!e.Handled)
                             {
                                 e.Handled = OnSingleTapped(location);
                             }
-                        }
-                        _numOfTaps = 1;
-                        if (_waitingForDoubleTap)
-                        {
-                            _waitingForDoubleTap = false; ;
                         }
                     }
                     else if (isAround && (ticks - releasedTouch.Tick) >= longTap * 10000)

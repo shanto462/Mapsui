@@ -21,7 +21,7 @@ namespace Mapsui.Samples.Forms
         public bool OnClick(object sender, EventArgs args)
         {
             var mapView = sender as MapView;
-            var e = args as MapClickedEventArgs;
+            var mapClickedArgs = args as MapClickedEventArgs;
 
             var assembly = typeof(MainPageLarge).GetTypeInfo().Assembly;
             foreach (var str in assembly.GetManifestResourceNames())
@@ -45,14 +45,14 @@ namespace Mapsui.Samples.Forms
                     break;
             }
 
-            switch (e.NumOfTaps)
+            switch (mapClickedArgs.NumOfTaps)
             {
                 case 1:
                     var pin = new Pin(mapView)
                     {
                         Label = $"PinType.Pin {markerNum++}",
-                        Address = e.Point.ToString(),
-                        Position = e.Point,
+                        Position = mapClickedArgs.Point,
+                        Address = mapClickedArgs.Point.ToString(),
                         Type = PinType.Pin,
                         Color = new Xamarin.Forms.Color(rnd.Next(0, 256) / 256.0, rnd.Next(0, 256) / 256.0, rnd.Next(0, 256) / 256.0),
                         Transparency = 0.5f,
@@ -84,6 +84,15 @@ namespace Mapsui.Samples.Forms
                         pin.Callout.Type = CalloutType.Detail;
                         pin.Callout.Content = 1;
                     }
+                    pin.Callout.CalloutClicked += (s, e) =>
+                    {
+                        if (e.Callout.Title != "You clicked me!")
+                        {
+                            e.Callout.Type = CalloutType.Single;
+                            e.Callout.Title = "You clicked me!";
+                            e.Handled = true;
+                        }
+                    };
                     mapView.Pins.Add(pin);
                     pin.ShowCallout();
                     break;
@@ -97,7 +106,7 @@ namespace Mapsui.Samples.Forms
                     mapView.Pins.Add(new Pin(mapView)
                     {
                         Label = $"PinType.Svg {markerNum++}",
-                        Position = e.Point,
+                        Position = mapClickedArgs.Point,
                         Type = PinType.Svg,
                         Scale = 0.1f,
                         Svg = svgString
@@ -108,7 +117,7 @@ namespace Mapsui.Samples.Forms
                     mapView.Pins.Add(new Pin(mapView)
                     {
                         Label = $"PinType.Icon {markerNum++}",
-                        Position = e.Point,
+                        Position = mapClickedArgs.Point,
                         Type = PinType.Icon,
                         Scale = 0.5f,
                         Icon = icon

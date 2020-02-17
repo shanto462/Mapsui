@@ -59,12 +59,12 @@ namespace Mapsui.Samples.Forms
                         Scale = rnd.Next(50, 130) / 100f,
                     };
                     pin.Callout.Anchor = new Point(0, pin.Height * pin.Scale);
-                    pin.Callout.RectRadius = rnd.Next(0, 30);
-                    pin.Callout.ArrowHeight = rnd.Next(0, 20);
+                    pin.Callout.RectRadius = rnd.Next(0, 10);
+                    pin.Callout.ArrowHeight = rnd.Next(5, 20);
                     pin.Callout.ArrowWidth = rnd.Next(0, 20);
                     pin.Callout.ArrowAlignment = (ArrowAlignment)rnd.Next(0, 4);
-                    pin.Callout.ArrowPosition = rnd.Next(0, 100) / 100;
-                    pin.Callout.Padding = new Thickness(rnd.Next(0, 20), rnd.Next(0, 20));
+                    pin.Callout.ArrowPosition = rnd.Next(0, 100) / 100.0;
+                    pin.Callout.Padding = new Thickness(0, 0); // rnd.Next(0, 20), rnd.Next(0, 20));
                     pin.Callout.BackgroundColor = Color.White;
                     pin.Callout.Color = pin.Color;
                     if (rnd.Next(0, 3) < 2)

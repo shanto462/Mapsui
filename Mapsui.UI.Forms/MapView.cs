@@ -802,9 +802,33 @@ namespace Mapsui.UI.Forms
                     }
                 }
             }
+            // Check for clicked callouts
+            else if (e.MapInfo.Layer == _mapCalloutLayer)
+            {
+                Callout clickedCallout = null;
+                var callouts = _callouts.ToList();
 
+                foreach (var callout in callouts)
+                {
+                    if (callout.Feature.Equals(e.MapInfo.Feature))
+                    {
+                        clickedCallout = callout;
+                        break;
+                    }
+                }
+
+                var calloutArgs = new CalloutClickedEventArgs(clickedCallout, 
+                    _mapControl.Viewport.ScreenToWorld(e.MapInfo.ScreenPosition).ToForms(),
+                    new Point(e.MapInfo.ScreenPosition.X, e.MapInfo.ScreenPosition.Y), e.NumTaps);
+
+                clickedCallout?.HandleCalloutClicked(this, calloutArgs);
+
+                e.Handled = calloutArgs.Handled;
+
+                return;
+            }
             // Check for clicked drawables
-            if (e.MapInfo.Layer == _mapDrawableLayer)
+            else if (e.MapInfo.Layer == _mapDrawableLayer)
             {
                 Drawable clickedDrawable = null;
                 var drawables = _drawable.ToList();

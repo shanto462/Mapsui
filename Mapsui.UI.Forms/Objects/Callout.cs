@@ -1,8 +1,8 @@
 ﻿using Mapsui.Geometries;
 using Mapsui.Providers;
 using Mapsui.Styles;
-using Mapsui.UI.Forms;
 using Mapsui.UI.Forms.Extensions;
+using Mapsui.UI.Objects;
 using SkiaSharp;
 using System;
 using System.IO;
@@ -11,7 +11,7 @@ using System.Runtime.CompilerServices;
 using Topten.RichTextKit;
 using Xamarin.Forms;
 
-namespace Mapsui.UI.Objects
+namespace Mapsui.UI.Forms
 {
     /// <summary>
     /// Type of Callout
@@ -31,30 +31,6 @@ namespace Mapsui.UI.Objects
         /// </summary>
         Custom,
     }
-
-    /// <summary>
-    /// Determins, where the pointer is
-    /// </summary>
-    public enum ArrowAlignment
-    {
-        /// <summary>
-        /// Callout arrow is at bottom side of bubble
-        /// </summary>
-        Bottom,
-        /// <summary>
-        /// Callout arrow is at left side of bubble
-        /// </summary>
-        Left,
-        /// <summary>
-        /// Callout arrow is at top side of bubble
-        /// </summary>
-        Top,
-        /// <summary>
-        /// Callout arrow is at right side of bubble
-        /// </summary>
-        Right,
-    }
-
 
     public class Callout : BindableObject, IFeatureProvider
     {
@@ -586,9 +562,18 @@ namespace Mapsui.UI.Objects
         /// </summary>
         /// <param name="sender">Sender</param>
         /// <param name="e">SKTouchEventArgs</param>
-        private void HandleCalloutClicked(object sender, EventArgs e)
+        internal void HandleCalloutClicked(object sender, CalloutClickedEventArgs e)
         {
             CalloutClicked?.Invoke(this, e);
+
+            if (e.Handled)
+                return;
+
+            // Check, if callout is closeable by click
+            if (IsClosableByClick)
+            {
+                _pin.HideCallout();
+            }
         }
 
         /// <summary>
@@ -668,7 +653,7 @@ namespace Mapsui.UI.Objects
                 Feature.Styles.Add(style);
             }
 
-            style.ArrowAlignment = (Mapsui.Styles.ArrowAlignment)ArrowAlignment;
+            style.ArrowAlignment = ArrowAlignment;
             style.ArrowHeight = (float)ArrowHeight;
             style.ArrowPosition = (float)ArrowPosition;
             style.BackgroundColor = BackgroundColor.ToMapsui(); ;

@@ -87,29 +87,29 @@ namespace Mapsui.Samples.Common.Maps
                     SKPixmap.Encode(wstream, bitmap, SKEncodedImageFormat.Png, 100);
                     bitmapId = BitmapRegistry.Instance.Register(memStream);
                 }
-                var calloutStyle = new CalloutStyle() { Content = bitmapId, ArrowPosition = Random.Next(1, 9) * 0.1f, RotateWithMap = true };
-                switch ((int)Random.Next(0,4))
-                {
-                    case 0:
-                        calloutStyle.ArrowAlignment = ArrowAlignment.Bottom;
-                        calloutStyle.Offset = new Geometries.Point(0, SymbolStyle.DefaultHeight * 0.5f);
-                        break;
-                    case 1:
-                        calloutStyle.ArrowAlignment = ArrowAlignment.Left;
-                        calloutStyle.Offset = new Geometries.Point(SymbolStyle.DefaultHeight * 0.5f, 0);
-                        break;
-                    case 2:
-                        calloutStyle.ArrowAlignment = ArrowAlignment.Top;
-                        calloutStyle.Offset = new Geometries.Point(0, -SymbolStyle.DefaultHeight * 0.5f);
-                        break;
-                    case 3:
-                        calloutStyle.ArrowAlignment = ArrowAlignment.Right;
-                        calloutStyle.Offset = new Geometries.Point(-SymbolStyle.DefaultHeight * 0.5f, 0);
-                        break;
-                }
-                calloutStyle.RectRadius = Random.Next(0, 9);
-                calloutStyle.ShadowWidth = Random.Next(0, 9);
-                feature.Styles.Add(calloutStyle);
+                //var calloutStyle = new CalloutStyle() { Content = bitmapId, ArrowPosition = Random.Next(1, 9) * 0.1f, RotateWithMap = true };
+                //switch ((int)Random.Next(0,4))
+                //{
+                //    case 0:
+                //        calloutStyle.ArrowAlignment = ArrowAlignment.Bottom;
+                //        calloutStyle.Offset = new Geometries.Point(0, SymbolStyle.DefaultHeight * 0.5f);
+                //        break;
+                //    case 1:
+                //        calloutStyle.ArrowAlignment = ArrowAlignment.Left;
+                //        calloutStyle.Offset = new Geometries.Point(SymbolStyle.DefaultHeight * 0.5f, 0);
+                //        break;
+                //    case 2:
+                //        calloutStyle.ArrowAlignment = ArrowAlignment.Top;
+                //        calloutStyle.Offset = new Geometries.Point(0, -SymbolStyle.DefaultHeight * 0.5f);
+                //        break;
+                //    case 3:
+                //        calloutStyle.ArrowAlignment = ArrowAlignment.Right;
+                //        calloutStyle.Offset = new Geometries.Point(-SymbolStyle.DefaultHeight * 0.5f, 0);
+                //        break;
+                //}
+                //calloutStyle.RectRadius = Random.Next(0, 9);
+                //calloutStyle.ShadowWidth = Random.Next(0, 9);
+                //feature.Styles.Add(calloutStyle);
                 return feature;
             });
         }

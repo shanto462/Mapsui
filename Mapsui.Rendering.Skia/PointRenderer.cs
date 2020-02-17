@@ -8,7 +8,7 @@ namespace Mapsui.Rendering.Skia
 {
     static class PointRenderer
     {
-        public static void Draw(SKCanvas canvas, IReadOnlyViewport viewport, IStyle style, IFeature feature, 
+        public static void Draw(SKCanvas canvas, IReadOnlyViewport viewport, IStyle style, IFeature feature,
             IGeometry geometry, SymbolCache symbolCache, float opacity)
         {
             var point = geometry as Point;
@@ -16,14 +16,14 @@ namespace Mapsui.Rendering.Skia
 
             if (style is LabelStyle labelStyle)    // case 1) LabelStyle
             {
-                LabelRenderer.Draw(canvas, labelStyle, feature, (float) destination.X, (float) destination.Y, 
+                LabelRenderer.Draw(canvas, labelStyle, feature, (float)destination.X, (float)destination.Y,
                     opacity);
             }
             else if (style is SymbolStyle)
             {
                 var symbolStyle = (SymbolStyle)style;
 
-                if ( symbolStyle.BitmapId >= 0)   // case 2) Bitmap Style
+                if (symbolStyle.BitmapId >= 0)   // case 2) Bitmap Style
                 {
                     DrawPointWithBitmapStyle(canvas, symbolStyle, destination, symbolCache, opacity, (float)viewport.Rotation);
                 }
@@ -32,70 +32,14 @@ namespace Mapsui.Rendering.Skia
                     DrawPointWithSymbolStyle(canvas, symbolStyle, destination, opacity, symbolStyle.SymbolType, (float)viewport.Rotation);
                 }
             }
-            else if (style is CalloutStyle)
-            {
-                DrawPointWithCalloutStyle(canvas, (CalloutStyle)style, destination, symbolCache, opacity, (float)viewport.Rotation);
-            }
             else if (style is VectorStyle)        // case 4) VectorStyle
             {
-                DrawPointWithVectorStyle(canvas, (VectorStyle) style, destination, opacity);
+                DrawPointWithVectorStyle(canvas, (VectorStyle)style, destination, opacity);
             }
             else
             {
                 throw new Exception($"Style of type '{style.GetType()}' is not supported for points");
             }
-        }
-
-        private static void DrawPointWithCalloutStyle(SKCanvas canvas, CalloutStyle style, Point destination, SymbolCache symbolCache,
-            float opacity, float mapRotation)
-        {
-            var shadow = new SKPaint { IsAntialias = true, Style = SKPaintStyle.Stroke, StrokeWidth = 1.5f, Color = SKColors.Gray, MaskFilter = SKMaskFilter.CreateBlur(SKBlurStyle.Normal, style.ShadowWidth) };
-            var fill = new SKPaint { IsAntialias = true, Style = SKPaintStyle.Fill, Color = style.BackgroundColor.ToSkia(opacity) };
-            var stroke = new SKPaint { IsAntialias = true, Style = SKPaintStyle.Stroke, Color = style.Color.ToSkia(opacity), StrokeWidth = style.StrokeWidth };
-
-            SKPath path;
-            SKPoint center;
-
-            if (style.Path == null)
-            {
-                (path, center) = CreateCalloutPath(style, symbolCache);
-                style.Path = path;
-                style.Center = center;
-                style.BoundingBox = new BoundingBox(path.Bounds.Left + style.Offset.X - center.X, 
-                    path.Bounds.Top + style.Offset.Y - center.Y, 
-                    path.Bounds.Right + style.Offset.X + center.X, 
-                    path.Bounds.Bottom + style.Offset.Y + center.Y);
-            }
-
-            path = (SKPath)style.Path;
-            center = (SKPoint)style.Center;
-
-            var rotation = style.Rotation;
-            if (style.RotateWithMap) rotation += mapRotation;
-
-            canvas.Save();
-            canvas.Translate((float)destination.X - center.X + (float)style.Offset.X, (float)destination.Y - center.Y - (float)style.Offset.Y);
-
-            if (rotation != 0)
-                canvas.RotateDegrees(rotation, center.X, center.Y);
-
-            //canvas.Clear(SKColors.Transparent);
-            canvas.DrawPath(path, shadow);
-            canvas.DrawPath(path, fill);
-            canvas.DrawPath(path, stroke);
-
-            if (rotation != 0)
-                canvas.RotateDegrees(-rotation, 0, 0);
-
-            // Draw content
-            if (style.Content >= 0)
-            {
-                var offsetX = symbolCache.GetOrCreate(style.Content).Width * 0.5f + style.ShadowWidth + (float)style.Padding.MinX;
-                var offsetY = -(symbolCache.GetOrCreate(style.Content).Height * 0.5f + style.ShadowWidth + (float)style.Padding.MinY);
-                DrawBitmap(canvas, symbolCache.GetOrCreate(style.Content), new Point(0, 0), new Point(offsetX, offsetY), symbolCache, opacity, rotation, 1.0);
-            }
-
-            canvas.Restore();
         }
 
         private static void DrawPointWithSymbolStyle(SKCanvas canvas, SymbolStyle style,
@@ -107,7 +51,7 @@ namespace Mapsui.Rendering.Skia
             if (style.SymbolOffset.IsRelative)
                 canvas.Translate((float)(SymbolStyle.DefaultWidth * style.SymbolOffset.X), (float)(-SymbolStyle.DefaultWidth * style.SymbolOffset.Y));
             else
-                canvas.Translate((float) style.SymbolOffset.X, (float) -style.SymbolOffset.Y);
+                canvas.Translate((float)style.SymbolOffset.X, (float)-style.SymbolOffset.Y);
             if (style.SymbolRotation != 0)
             {
                 var rotation = (float)style.SymbolRotation;
@@ -163,7 +107,7 @@ namespace Mapsui.Rendering.Skia
             return new SKPaint
             {
                 Color = outline.Color.ToSkia(opacity),
-                StrokeWidth = (float) outline.Width,
+                StrokeWidth = (float)outline.Width,
                 StrokeCap = outline.PenStrokeCap.ToSkia(),
                 PathEffect = outline.PenStyle.ToSkia((float)outline.Width),
                 Style = SKPaintStyle.Stroke,
@@ -231,26 +175,21 @@ namespace Mapsui.Rendering.Skia
             var rotation = (float)symbolStyle.SymbolRotation;
             if (symbolStyle.RotateWithMap) rotation += mapRotation;
 
-            DrawBitmap(canvas, bitmap, destination, new Point(offsetX, offsetY), symbolCache, opacity, rotation, symbolStyle.SymbolScale);
-        }
-        
-        private static void DrawBitmap(SKCanvas canvas, BitmapInfo bitmap, Point destination, Point offset, SymbolCache symbolCache, float opacity, float rotation, double scale)
-        { 
             switch (bitmap.Type)
             {
                 case BitmapType.Bitmap:
                     BitmapHelper.RenderBitmap(canvas, bitmap.Bitmap,
-                        (float) destination.X, (float) destination.Y,
+                        (float)destination.X, (float)destination.Y,
                         rotation,
-                        (float) offset.X, (float) offset.Y,
-                        opacity: opacity, scale: (float) scale);
+                        (float)offsetX, (float)offsetY,
+                        opacity: opacity, scale: (float)symbolStyle.SymbolScale);
                     break;
                 case BitmapType.Svg:
                     BitmapHelper.RenderSvg(canvas, bitmap.Svg,
                         (float)destination.X, (float)destination.Y,
                         rotation,
-                        (float)offset.X, (float)offset.Y,
-                        opacity: opacity, scale: (float)scale);
+                        (float)offsetX, (float)offsetY,
+                        opacity: opacity, scale: (float)symbolStyle.SymbolScale);
                     break;
                 case BitmapType.Sprite:
                     var sprite = bitmap.Sprite;
@@ -263,115 +202,10 @@ namespace Mapsui.Rendering.Skia
                     BitmapHelper.RenderBitmap(canvas, (SKImage)sprite.Data,
                         (float)destination.X, (float)destination.Y,
                         rotation,
-                        (float)offset.X, (float)offset.Y,
-                        opacity: opacity, scale: (float)scale);
+                        (float)offsetX, (float)offsetY,
+                        opacity: opacity, scale: (float)symbolStyle.SymbolScale);
                     break;
             }
-        }
-
-        /// <summary>
-        /// Update path
-        /// </summary>
-        private static (SKPath, SKPoint) CreateCalloutPath(CalloutStyle style, SymbolCache symbolCache)
-        {
-            var width = (style.Content >= 0 ? (float)symbolCache.GetSize(style.Content).Width : style.DefaultWidth) + (float)style.Padding.MinX + (float)style.Padding.MaxX;
-            //width += style.ArrowAlignment == ArrowAlignment.Left || style.ArrowAlignment == ArrowAlignment.Right ? style.ArrowHeight : 0;
-            var height = (style.Content >= 0 ? (float)symbolCache.GetSize(style.Content).Height : style.DefaultHeight) + (float)style.Padding.MinY + (float)style.Padding.MaxY;
-            //height += style.ArrowAlignment == ArrowAlignment.Top || style.ArrowAlignment == ArrowAlignment.Bottom ? style.ArrowHeight : 0;
-            var halfWidth = width * style.ArrowPosition;
-            var halfHeight = height * style.ArrowPosition;
-            var bottom = (float)height + style.ShadowWidth;
-            var left = style.ShadowWidth;
-            var top = style.ShadowWidth;
-            var right = (float)width + style.ShadowWidth;
-            var start = new SKPoint();
-            var center = new SKPoint();
-            var end = new SKPoint();
-
-            // Check, if we are to near of the corners
-            if (halfWidth - style.ArrowWidth * 0.5f - left < style.RectRadius)
-                halfWidth = style.ArrowWidth * 0.5f + left + style.RectRadius;
-            else if (halfWidth + style.ArrowWidth * 0.5f  > width - style.RectRadius)
-                halfWidth = width - style.ArrowWidth * 0.5f - style.RectRadius;
-            if (halfHeight - style.ArrowWidth * 0.5f - top < style.RectRadius)
-                halfHeight = style.ArrowWidth * 0.5f + top + style.RectRadius;
-            else if (halfHeight + style.ArrowWidth * 0.5f > height - style.RectRadius)
-                halfHeight = height - style.ArrowWidth * 0.5f - style.RectRadius;
-
-            switch (style.ArrowAlignment)
-            {
-                case ArrowAlignment.Bottom:
-                    start = new SKPoint(halfWidth + style.ArrowWidth * 0.5f, bottom);
-                    center = new SKPoint(halfWidth, bottom + style.ArrowHeight);
-                    end = new SKPoint(halfWidth - style.ArrowWidth * 0.5f, bottom);
-                    break;
-                case ArrowAlignment.Top:
-                    start = new SKPoint(halfWidth - style.ArrowWidth * 0.5f, top);
-                    center = new SKPoint(halfWidth, top - style.ArrowHeight);
-                    end = new SKPoint(halfWidth + style.ArrowWidth * 0.5f, top);
-                    break;
-                case ArrowAlignment.Left:
-                    start = new SKPoint(left, halfHeight + style.ArrowWidth * 0.5f);
-                    center = new SKPoint(left - style.ArrowHeight, halfHeight);
-                    end = new SKPoint(left, halfHeight - style.ArrowWidth * 0.5f);
-                    break;
-                case ArrowAlignment.Right:
-                    start = new SKPoint(right, halfHeight - style.ArrowWidth * 0.5f);
-                    center = new SKPoint(right + style.ArrowHeight, halfHeight);
-                    end = new SKPoint(right, halfHeight + style.ArrowWidth * 0.5f);
-                    break;
-            }
-
-            // Create path
-            var path = new SKPath();
-
-            // Move to start point at left/top
-            path.MoveTo(left + style.RectRadius, top);
-
-            // Top horizontal line
-            if (style.ArrowAlignment == ArrowAlignment.Top)
-                DrawArrow(path, start, center, end);
-
-            // Top right arc
-            path.ArcTo(new SKRect(right - style.RectRadius, top, right, top + style.RectRadius), 270, 90, false);
-
-            // Right vertical line
-            if (style.ArrowAlignment == ArrowAlignment.Right)
-                DrawArrow(path, start, center, end);
-
-            // Bottom right arc
-            path.ArcTo(new SKRect(right - style.RectRadius, bottom - style.RectRadius, right, bottom), 0, 90, false);
-
-            // Bottom horizontal line
-            if (style.ArrowAlignment == ArrowAlignment.Bottom)
-                DrawArrow(path, start, center, end);
-
-            // Bottom left arc
-            path.ArcTo(new SKRect(left, bottom - style.RectRadius, left + style.RectRadius, bottom), 90, 90, false);
-
-            // Left vertical line
-            if (style.ArrowAlignment == ArrowAlignment.Left)
-                DrawArrow(path, start, center, end);
-
-            // Top left arc
-            path.ArcTo(new SKRect(left, top, left + style.RectRadius, top + style.RectRadius), 180, 90, false);
-
-            path.Close();
-
-            return (path, center);
-        }
-
-        /// <summary>
-        /// Draw arrow to path
-        /// </summary>
-        /// <param name="start">Start of arrow at bubble</param>
-        /// <param name="center">Center of arrow</param>
-        /// <param name="end">End of arrow at bubble</param>
-        private static void DrawArrow(SKPath path, SKPoint start, SKPoint center, SKPoint end)
-        {
-            path.LineTo(start);
-            path.LineTo(center);
-            path.LineTo(end);
         }
     }
 }

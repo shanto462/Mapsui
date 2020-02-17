@@ -223,6 +223,14 @@ namespace Mapsui.UI.Forms
         }
 
         /// <summary>
+        /// Pin to which this callout belongs
+        /// </summary>
+        public Pin Pin
+        {
+            get { return _pin; }
+        }
+
+        /// <summary>
         /// Type of Callout
         /// </summary>
         /// <remarks>
@@ -561,7 +569,7 @@ namespace Mapsui.UI.Forms
         /// Callout is touched
         /// </summary>
         /// <param name="sender">Sender</param>
-        /// <param name="e">SKTouchEventArgs</param>
+        /// <param name="e">CalloutClickedEventArgs</param>
         internal void HandleCalloutClicked(object sender, CalloutClickedEventArgs e)
         {
             CalloutClicked?.Invoke(this, e);

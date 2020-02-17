@@ -121,7 +121,11 @@ namespace Mapsui.Samples.Forms
 
         public void Setup(IMapControl mapControl)
         {
-            mapControl.Map = OsmSample.CreateMap();
+            //OSM never displays....
+            //mapControl.Map = OsmSample.CreateMap();
+
+            //I like bing Hybrid
+            mapControl.Map = BingSample.CreateMap(BruTile.Predefined.KnownTileSource.BingHybrid);
 
             ((MapView)mapControl).UseDoubleTap = true;
             //((MapView)mapControl).UniqueCallout = true;

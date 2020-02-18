@@ -1,7 +1,4 @@
 ﻿using System;
-using System.IO;
-using Mapsui.Samples.Common.Helpers;
-using Mapsui.Samples.Common.Maps;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using Mapsui.UI.Forms;
@@ -9,7 +6,7 @@ using Plugin.Geolocator;
 using Plugin.Geolocator.Abstractions;
 using Mapsui.UI;
 using System.Threading.Tasks;
-using Mapsui.Styles;
+using Mapsui.Rendering.Skia;
 
 namespace Mapsui.Samples.Forms
 {

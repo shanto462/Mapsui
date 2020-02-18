@@ -1,5 +1,6 @@
 ﻿using Mapsui.Geometries;
 using Mapsui.Providers;
+using Mapsui.Rendering.Skia;
 using Mapsui.Styles;
 using Mapsui.UI.Forms.Extensions;
 using Mapsui.UI.Objects;

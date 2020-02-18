@@ -1,7 +1,6 @@
-﻿using Mapsui.Samples.Common;
+﻿using Mapsui.Rendering.Skia;
+using Mapsui.Samples.Common;
 using Mapsui.Samples.Common.ExtensionMethods;
-using Mapsui.Styles;
-using Mapsui.UI;
 using Mapsui.UI.Forms;
 using Plugin.Geolocator;
 using Plugin.Geolocator.Abstractions;

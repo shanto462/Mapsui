@@ -1,7 +1,7 @@
-﻿using Mapsui.Samples.Common.Maps;
+﻿using Mapsui.Rendering.Skia;
+using Mapsui.Samples.Common.Maps;
 using Mapsui.UI;
 using Mapsui.UI.Forms;
-using Mapsui.UI.Objects;
 using System;
 using System.IO;
 using System.Reflection;

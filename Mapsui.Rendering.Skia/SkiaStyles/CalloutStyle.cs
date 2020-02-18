@@ -46,10 +46,11 @@ namespace Mapsui.Rendering.Skia
         private Point _offset = new Point(0, 0);
         private double _rotation = 0;
 
+        public new static double DefaultWidth { get; set; } = 100;
+        public new static double DefaultHeight { get; set; } = 30;
+
         public CalloutStyle()
         {
-            DefaultWidth = 100;
-            DefaultHeight = 30;
         }
 
         /// <summary>
@@ -338,14 +339,11 @@ namespace Mapsui.Rendering.Skia
                 var image = surface.Snapshot();
                 var data = image.Encode(SKEncodedImageFormat.Png, 100);
 
-                // Remove old bitmap
-                if (BitmapId >= 0)
-                {
-                    BitmapRegistry.Instance.Unregister(BitmapId);
-                }
-
                 // Register 
-                BitmapId = BitmapRegistry.Instance.Register(data.AsStream(true));
+                if (BitmapId >= 0)
+                    BitmapRegistry.Instance.Set(BitmapId, data.AsStream(true));
+                else
+                    BitmapId = BitmapRegistry.Instance.Register(data.AsStream(true));
             }
         }
 
@@ -356,8 +354,12 @@ namespace Mapsui.Rendering.Skia
         private (double, double) CalcSize(double contentWidth, double contentHeight)
         {
             // Add padding around the content
-            var width = contentWidth + _padding.Left + _padding.Right + 1;
-            var height = contentHeight + _padding.Top + _padding.Bottom + 1;
+            var paddingLeft = _padding.Left < _rectRadius * 0.5 ? _rectRadius * 0.5 : _padding.Left;
+            var paddingTop = _padding.Top < _rectRadius * 0.5 ? _rectRadius * 0.5 : _padding.Top;
+            var paddingRight = _padding.Right < _rectRadius * 0.5 ? _rectRadius * 0.5 : _padding.Right;
+            var paddingBottom = _padding.Bottom < _rectRadius * 0.5 ? _rectRadius * 0.5 : _padding.Bottom;
+            var width = contentWidth + paddingLeft + paddingRight + 1;
+            var height = contentHeight + paddingTop + paddingBottom + 1;
 
             // Add length of arrow
             switch (ArrowAlignment)
@@ -376,6 +378,10 @@ namespace Mapsui.Rendering.Skia
             width += _strokeWidth;
             height += _strokeWidth;
 
+            // Add shadow to all sides
+            width += _shadowWidth * 2;
+            height += _shadowWidth * 2;
+
             return (width, height);
         }
 
@@ -385,15 +391,6 @@ namespace Mapsui.Rendering.Skia
             var fill = new SKPaint { IsAntialias = true, Style = SKPaintStyle.Fill, Color = ToSkia(_backgroundColor) };
             var stroke = new SKPaint { IsAntialias = true, Style = SKPaintStyle.Stroke, Color = ToSkia(_color), StrokeWidth = _strokeWidth };
 
-            //var rotation = style.Rotation;
-            //if (style.RotateWithMap) rotation += mapRotation;
-
-            //canvas.Save();
-            //canvas.Translate((float)destination.X - center.X + (float)style.Offset.X, (float)destination.Y - center.Y - (float)style.Offset.Y);
-
-            //if (rotation != 0)
-            //    canvas.RotateDegrees(rotation, center.X, center.Y);
-
             canvas.Clear(SKColors.Transparent);
             canvas.DrawPath(_path, shadow);
             canvas.DrawPath(_path, fill);
@@ -402,14 +399,11 @@ namespace Mapsui.Rendering.Skia
          
         private void DrawContent(SKCanvas canvas, Rendering.Skia.BitmapInfo bitmapInfo)
         { 
-            //if (rotation != 0)
-            //    canvas.RotateDegrees(-rotation, 0, 0);
-
             // Draw content
             if (_content >= 0)
             {
-                var offsetX = _shadowWidth + (float)_padding.Left;
-                var offsetY = _shadowWidth + (float)_padding.Top;
+                var offsetX = _shadowWidth + (_padding.Left < _rectRadius * 0.5 ? _rectRadius * 0.5f : (float)_padding.Left);
+                var offsetY = _shadowWidth + (_padding.Top < _rectRadius * 0.5 ? _rectRadius * 0.5f : (float)_padding.Top);
 
                 switch (ArrowAlignment)
                 {
@@ -444,9 +438,12 @@ namespace Mapsui.Rendering.Skia
         /// </summary>
         private (SKPath, SKPoint) CreateCalloutPath(double contentWidth, double contentHeight)
         {
-            var width = (float)contentWidth + (float)Padding.Left + (float)Padding.Right;
-            var height = (float)contentHeight + (float)Padding.Top + (float)Padding.Bottom;
-            //height += style.ArrowAlignment == ArrowAlignment.Top || style.ArrowAlignment == ArrowAlignment.Bottom ? style.ArrowHeight : 0;
+            var paddingLeft = _padding.Left < _rectRadius * 0.5 ? _rectRadius * 0.5 : _padding.Left;
+            var paddingTop = _padding.Top < _rectRadius * 0.5 ? _rectRadius * 0.5 : _padding.Top;
+            var paddingRight = _padding.Right < _rectRadius * 0.5 ? _rectRadius * 0.5 : _padding.Right;
+            var paddingBottom = _padding.Bottom < _rectRadius * 0.5 ? _rectRadius * 0.5 : _padding.Bottom;
+            var width = (float)contentWidth + (float)paddingLeft + (float)paddingRight;
+            var height = (float)contentHeight + (float)paddingTop + (float)paddingBottom;
             var halfWidth = width * ArrowPosition;
             var halfHeight = height * ArrowPosition;
             var bottom = (float)height + ShadowWidth;
@@ -457,7 +454,7 @@ namespace Mapsui.Rendering.Skia
             var center = new SKPoint();
             var end = new SKPoint();
 
-            // Check, if we are to near of the corners
+            // Check, if we are to near at corners
             if (halfWidth - ArrowWidth * 0.5f - left < RectRadius)
                 halfWidth = ArrowWidth * 0.5f + left + RectRadius;
             else if (halfWidth + ArrowWidth * 0.5f > width - RectRadius)

@@ -144,7 +144,7 @@ namespace Mapsui.Samples.Forms
 
         private Pin CreatePin(int num)
         {
-            var position = new Position(0 + rnd.Next(-85, +85), 0 + rnd.Next(-180, +180));
+            var position = new Position(0 + rnd.Next(-85000, +85000) / 1000.0, 0 + rnd.Next(-180000, +180000) / 1000.0);
 
             var pin = new Pin()
             {

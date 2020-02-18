@@ -3,6 +3,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Mapsui.Providers;
+using Mapsui.Rendering.Skia;
 using Mapsui.Styles;
 using Mapsui.UI.Forms.Extensions;
 using Mapsui.UI.Objects;
@@ -16,6 +17,7 @@ namespace Mapsui.UI.Forms
     {
         private int _bitmapId = -1;
         private byte[] _bitmapData;
+        private bool _wasCalloutVisible;
         private MapView _mapView;
 
         public static readonly BindableProperty TypeProperty = BindableProperty.Create(nameof(Type), typeof(PinType), typeof(Pin), default(PinType));
@@ -381,6 +383,8 @@ namespace Mapsui.UI.Forms
                     ((SymbolStyle)_feature.Styles.First()).SymbolRotation = Rotation;
                     break;
                 case nameof(IsVisible):
+                    if (!IsVisible)
+                        HideCallout();
                     ((SymbolStyle)_feature.Styles.First()).Enabled = IsVisible;
                     break;
                 case nameof(MinVisible):

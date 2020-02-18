@@ -65,6 +65,7 @@ namespace Mapsui.Styles
             if (id < 0 || id >= _counter || !_register.ContainsKey(id))
                 return false;
 
+            _register[id] = null;
             _register[id] = bitmapData;
 
             return true;

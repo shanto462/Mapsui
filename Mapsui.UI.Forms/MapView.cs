@@ -715,6 +715,8 @@ namespace Mapsui.UI.Forms
                     {
                         pin.PropertyChanged -= HandlerPinPropertyChanged;
 
+                        pin.HideCallout();
+
                         if (SelectedPin != null && SelectedPin.Equals(pin))
                             SelectedPin = null;
                     }

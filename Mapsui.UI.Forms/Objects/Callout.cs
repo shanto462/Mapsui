@@ -14,32 +14,10 @@ using Xamarin.Forms;
 
 namespace Mapsui.UI.Forms
 {
-    /// <summary>
-    /// Type of Callout
-    /// </summary>
-    public enum CalloutType
-    {
-        /// <summary>
-        /// Only one line is shown
-        /// </summary>
-        Single,
-        /// <summary>
-        /// Header and detail is shown
-        /// </summary>
-        Detail,
-        /// <summary>
-        /// Content is custom, the bitmap given in Content is shown
-        /// </summary>
-        Custom,
-    }
-
     public class Callout : BindableObject, IFeatureProvider
     {
         private Pin _pin;
-        private TextBlock _textBlockTitle;
-        private TextBlock _textBlockSubtitle;
         private bool _updating = false;
-        private int _internalContent = -1;
 
         public event EventHandler<EventArgs> CalloutClosed;
         public event EventHandler<CalloutClickedEventArgs> CalloutClicked;
@@ -522,12 +500,12 @@ namespace Mapsui.UI.Forms
         {
             base.OnPropertyChanged(propertyName);
 
-            if (!_updating && Type != CalloutType.Custom && propertyName.Equals(nameof(Content)))
+            if (Type != CalloutType.Custom && propertyName.Equals(nameof(Content)))
             {
                 Type = CalloutType.Custom;
             }
 
-            if (!_updating && IsVisible && (propertyName.Equals(nameof(Title))
+            if (IsVisible && (propertyName.Equals(nameof(Title))
                 || propertyName.Equals(nameof(Subtitle))
                 || propertyName.Equals(nameof(Content))
                 || propertyName.Equals(nameof(Type))
@@ -546,7 +524,6 @@ namespace Mapsui.UI.Forms
                 )
             {
                 UpdateContent();
-                UpdateCalloutStyle();
             }
             else if (IsVisible && propertyName.Equals(nameof(ArrowAlignment))
                 || propertyName.Equals(nameof(ArrowWidth))
@@ -561,10 +538,8 @@ namespace Mapsui.UI.Forms
             {
                 UpdateCalloutStyle();
             }
-            else if (!_updating && IsVisible)
-            {
-                throw new Exception("Unknown property name");
-            }
+
+            _pin?.MapView?.Refresh();
         }
 
         /// <summary>
@@ -592,63 +567,32 @@ namespace Mapsui.UI.Forms
         /// </summary>
         private void UpdateContent()
         {
-            if (Type == CalloutType.Custom)
-                return;
+            CalloutStyle style = (CalloutStyle)Feature.Styles.Where((s) => s is CalloutStyle).FirstOrDefault();
 
-            _updating = true;
-
-            if (_textBlockTitle == null)
+            if (style == null)
             {
-                _textBlockTitle = new TextBlock();
-            }
-            else
-            {
-                _textBlockTitle.Clear();
+                style = new CalloutStyle();
+                Feature.Styles.Add(style);
             }
 
-            var styleTitle = new Topten.RichTextKit.Style()
-            {
-                FontFamily = TitleFontName,
-                FontSize = (float)TitleFontSize,
-                FontItalic = (TitleFontAttributes & FontAttributes.Italic) == FontAttributes.Italic,
-                FontWeight = TitleFontAttributes == FontAttributes.Bold ? 700 : 400,
-                TextColor = new SkiaSharp.SKColor((byte)(TitleFontColor.R * 256), (byte)(TitleFontColor.G * 256), (byte)(TitleFontColor.B * 256)),
-            };
-
-            if (_textBlockSubtitle == null)
-            {
-                _textBlockSubtitle = new TextBlock();
-            }
-            else
-            {
-                _textBlockSubtitle.Clear();
-            }
-
-            var styleSubtitle = new Topten.RichTextKit.Style()
-            {
-                FontFamily = SubtitleFontName,
-                FontSize = (float)SubtitleFontSize,
-                FontItalic = (SubtitleFontAttributes & FontAttributes.Italic) == FontAttributes.Italic,
-                FontWeight = SubtitleFontAttributes == FontAttributes.Bold ? 700 : 400,
-                TextColor = new SkiaSharp.SKColor((byte)(SubtitleFontColor.R * 256), (byte)(SubtitleFontColor.G * 256), (byte)(SubtitleFontColor.B * 256)),
-            };
-
-            switch (Type)
-            {
-                case CalloutType.Detail:
-                    _textBlockSubtitle.Alignment = (Topten.RichTextKit.TextAlignment)(SubtitleTextAlignment + 1);
-                    _textBlockSubtitle.AddText(Subtitle, styleSubtitle);
-                    goto case CalloutType.Single;
-                case CalloutType.Single:
-                    _textBlockTitle.Alignment = (Topten.RichTextKit.TextAlignment)(TitleTextAlignment + 1);
-                    _textBlockTitle.AddText(Title, styleTitle);
-                    CreateContent();
-                    break;
-                case CalloutType.Custom:
-                    break;
-            }
-
-            _updating = false;
+            style.Type = Type;
+            style.Content = Content;
+            style.Title = Title;
+            style.TitleFontName = TitleFontName;
+            style.TitleFontSize = TitleFontSize;
+            style.TitleFontItalic = (TitleFontAttributes & FontAttributes.Italic) != 0;
+            style.TitleFontBold = (TitleFontAttributes & FontAttributes.Bold) != 0;
+            style.TitleFontColor = TitleFontColor.ToMapsui();
+            style.TitleTextAlignment = TitleTextAlignment.ToMapsui();
+            style.Subtitle = Subtitle;
+            style.SubtitleFontName = SubtitleFontName;
+            style.SubtitleFontSize = SubtitleFontSize;
+            style.SubtitleFontItalic = (SubtitleFontAttributes & FontAttributes.Italic) != 0;
+            style.SubtitleFontBold = (SubtitleFontAttributes & FontAttributes.Bold) != 0;
+            style.SubtitleFontColor = SubtitleFontColor.ToMapsui();
+            style.SubtitleTextAlignment = SubtitleTextAlignment.ToMapsui();
+            style.Spacing = Spacing;
+            style.MaxWidth = MaxWidth;
         }
 
         /// <summary>
@@ -677,8 +621,6 @@ namespace Mapsui.UI.Forms
             style.ShadowWidth = (float)ShadowWidth;
             style.StrokeWidth = (float)StrokeWidth;
             style.Content = Content;
-
-            _pin?.MapView?.Refresh();
         }
 
         /// <summary>
@@ -688,46 +630,6 @@ namespace Mapsui.UI.Forms
         {
             UpdateContent();
             UpdateCalloutStyle();
-        }
-
-        /// <summary>
-        /// Create content BitmapId from given TextBlock
-        /// </summary>
-        private void CreateContent()
-        {
-            _textBlockTitle.MaxWidth = _textBlockSubtitle.MaxWidth = (float)MaxWidth;
-            // Layout TextBlocks
-            _textBlockTitle.Layout();
-            _textBlockSubtitle.Layout();
-            // Get sizes
-            var width = Math.Max(_textBlockTitle.MeasuredWidth, _textBlockSubtitle.MeasuredWidth);
-            var height = _textBlockTitle.MeasuredHeight + (Type == CalloutType.Detail ? _textBlockSubtitle.MeasuredHeight + Spacing : 0);
-            // Now we have the correct width, so make a new layout cycle for text alignment
-            _textBlockTitle.MaxWidth = _textBlockSubtitle.MaxWidth = width;
-            _textBlockTitle.Layout();
-            _textBlockSubtitle.Layout();
-            // Create bitmap from TextBlock
-            var info = new SKImageInfo((int)width, (int)height, SKImageInfo.PlatformColorType, SKAlphaType.Premul);
-            var memStream = new MemoryStream();
-            using (var bitmap = new SKBitmap(info))
-            using (var canvas = new SKCanvas(bitmap))
-            using (SKManagedWStream wstream = new SKManagedWStream(memStream))
-            {
-                canvas.Clear(SKColors.Transparent);
-                // surface.Canvas.Scale(DeviceDpi / 96.0f);
-                _textBlockTitle.Paint(canvas, new TextPaintOptions() { IsAntialias = true });
-                _textBlockSubtitle.Paint(canvas, new SKPoint(0, _textBlockTitle.MeasuredHeight + (float)Spacing), new TextPaintOptions() { IsAntialias = true });
-                SKPixmap.Encode(wstream, bitmap, SKEncodedImageFormat.Png, 100);
-                if (_internalContent >= 0)
-                {
-                    BitmapRegistry.Instance.Set(_internalContent, memStream);
-                }
-                else
-                {
-                    _internalContent = BitmapRegistry.Instance.Register(memStream);
-                }
-                Content = _internalContent;
-            }
         }
 
         /// <summary>

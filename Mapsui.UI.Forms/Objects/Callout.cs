@@ -678,24 +678,6 @@ namespace Mapsui.UI.Forms
             style.StrokeWidth = (float)StrokeWidth;
             style.Content = Content;
 
-            var margin = Padding;
-
-            switch (ArrowAlignment)
-            {
-                case ArrowAlignment.Bottom:
-                    margin.Bottom += ArrowHeight;
-                    break;
-                case ArrowAlignment.Top:
-                    margin.Top += ArrowHeight;
-                    break;
-                case ArrowAlignment.Left:
-                    margin.Left += ArrowHeight;
-                    break;
-                case ArrowAlignment.Right:
-                    margin.Right += ArrowHeight;
-                    break;
-            }
-
             _pin?.MapView?.Refresh();
         }
 

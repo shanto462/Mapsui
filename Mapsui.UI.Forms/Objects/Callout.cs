@@ -39,6 +39,7 @@ namespace Mapsui.UI.Forms
         private TextBlock _textBlockTitle;
         private TextBlock _textBlockSubtitle;
         private bool _updating = false;
+        private int _internalContent = -1;
 
         public event EventHandler<EventArgs> CalloutClosed;
         public event EventHandler<CalloutClickedEventArgs> CalloutClicked;
@@ -735,7 +736,15 @@ namespace Mapsui.UI.Forms
                 _textBlockTitle.Paint(canvas, new TextPaintOptions() { IsAntialias = true });
                 _textBlockSubtitle.Paint(canvas, new SKPoint(0, _textBlockTitle.MeasuredHeight + (float)Spacing), new TextPaintOptions() { IsAntialias = true });
                 SKPixmap.Encode(wstream, bitmap, SKEncodedImageFormat.Png, 100);
-                Content = BitmapRegistry.Instance.Register(memStream);
+                if (_internalContent >= 0)
+                {
+                    BitmapRegistry.Instance.Set(_internalContent, memStream);
+                }
+                else
+                {
+                    _internalContent = BitmapRegistry.Instance.Register(memStream);
+                }
+                Content = _internalContent;
             }
         }
 

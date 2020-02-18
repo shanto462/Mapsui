@@ -1,10 +1,9 @@
 ﻿using Mapsui.Geometries;
 using Mapsui.Styles;
 using SkiaSharp;
-using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace Mapsui.UI
+namespace Mapsui.Rendering.Skia
 {
     /// <summary>
     /// Determins, where the pointer is
